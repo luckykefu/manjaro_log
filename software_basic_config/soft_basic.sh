@@ -25,29 +25,29 @@ find_and_run() {
 }
 # # ============================================================================
 echo "Installing haveged..."
-sudo pacman -S --noconfirm --needed haveged &>/dev/null
-sudo systemctl enable --now haveged &>/dev/null
+sudo pacman -S --noconfirm --needed haveged >/dev/null
+sudo systemctl enable --now haveged >/dev/null
 
 # # ============================================================================
 echo "Installing virtualbox..."
 sudo pacman -S --noconfirm --needed virtualbox \
 	linux$(uname -r | cut -d. -f1-2 | tr -d . | head -c3)-virtualbox-host-modules \
-	virtualbox-ext-vnc &>/dev/null
+	virtualbox-ext-vnc >/dev/null
 
 for mod in vboxdrv vboxnetadp vboxnetflt; do
-	sudo modprobe "$mod" &>/dev/null && echo "  ✓ Loaded $mod" || echo "  ✗ Failed to load $mod"
+	sudo modprobe "$mod" >/dev/null && echo "  ✓ Loaded $mod" || echo "  ✗ Failed to load $mod"
 done
 sudo usermod -aG vboxusers "$USER" && echo "  ✓ Added $USER to vboxusers group"
 # restart the systemd service for virtualbox
 
 # # ============================================================================
 echo "Installing docker..."
-sudo pacman -S --noconfirm --needed docker &>/dev/null
+sudo pacman -S --noconfirm --needed docker >/dev/null
 find_and_run docker_conf.sh
 
 # # ============================================================================
 echo "Installing aria2..."
-sudo pacman -S --noconfirm --needed aria2 &>/dev/null
+sudo pacman -S --noconfirm --needed aria2 >/dev/null
 
 # # ============================================================================
 echo "Installing miniconda3..."
@@ -55,7 +55,7 @@ find_and_run pip_conf.sh
 find_and_run miniconda3_conf.sh
 # # ============================================================================
 echo "Installing ardour..."
-sudo pacman -S --noconfirm --needed ardour &>/dev/null
+sudo pacman -S --noconfirm --needed ardour >/dev/null
 #--> Configure audio limits --> 配置音频限制
 sudo mkdir -p /etc/security/limits.d
 sudo tee "/etc/security/limits.d/$USER-audio-unlimited.conf" >/dev/null <<EOF
@@ -71,7 +71,7 @@ zsh_plugins_dir="/data/.zshplugins" && mkdir -p "$zsh_plugins_dir"
 zsh_sudo_dir="$zsh_plugins_dir/zsh-sudo"
 
 if [[ ! -d "$zsh_sudo_dir" ]]; then
-	git clone https://github.com/none9632/zsh-sudo.git "$zsh_sudo_dir" &>/dev/null
+	git clone https://github.com/none9632/zsh-sudo.git "$zsh_sudo_dir" >/dev/null
 	echo "  ✓ Cloned zsh-sudo"
 fi
 
@@ -82,32 +82,32 @@ if ! grep -q "zsh-sudo.zsh" ~/.zshrc 2>/dev/null; then
 fi
 
 # # ============================================================================
-echo "Installing vlc..."
-sudo pacman -S --noconfirm --needed vlc ffmpeg &>/dev/null
+echo "Installing mpv..."
+sudo pacman -S --noconfirm --needed mpv ffmpeg >/dev/null
 
 # # ============================================================================
 echo "Installing telegram-desktop..."
-sudo pacman -S --noconfirm --needed telegram-desktop &>/dev/null
+sudo pacman -S --noconfirm --needed telegram-desktop >/dev/null
 
 # # ============================================================================
 echo "Installing obs-studio..."
-sudo pacman -S --noconfirm --needed obs-studio &>/dev/null
+sudo pacman -S --noconfirm --needed obs-studio >/dev/null
 
 # # ============================================================================
 echo "Installing qbittorrent..."
-sudo pacman -S --noconfirm --needed qbittorrent &>/dev/null
+sudo pacman -S --noconfirm --needed qbittorrent >/dev/null
 
 # # ============================================================================
 echo "Installing ventoy..."
-sudo pacman -S --noconfirm --needed ventoy &>/dev/null
+sudo pacman -S --noconfirm --needed ventoy >/dev/null
 
 # # ============================================================================
 echo "Installing wine..."
-sudo pacman -S --noconfirm --needed wine wine-mono wine-gecko winetricks &>/dev/null
+sudo pacman -S --noconfirm --needed wine wine-mono wine-gecko winetricks >/dev/null
 
 # # ============================================================================
 echo "Installing yabridge..."
-sudo pacman -S --noconfirm --needed yabridgectl &>/dev/null
+sudo pacman -S --noconfirm --needed yabridgectl >/dev/null
 
 # # ============================================================================
 find_and_run path_append.sh "/data/.path/.appimage"

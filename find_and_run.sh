@@ -1,17 +1,20 @@
 #!/bin/bash
 find_and_run() {
-	local file=$1 func=${1%.sh}
-	shift 1
+	local dir=${1:-.}
+	local file=$2
+	local func=${file%.sh}
+	shift 2
 
 	local script
-	script=$(find . -type f -name "$file" -print -quit)
+	script=$(find "$dir" -type f -name "$file" -print -quit)
 
 	if [[ -z "$script" ]]; then
-		echo "Error: $file not found" >&2
+		echo "Error: $file not found in $dir" >&2
 		return 1
 	fi
 
 	echo "Running $script -> $func"
+	# shellcheck disable=SC1090
 	source "$script"
 
 	if ! declare -F "$func" >/dev/null; then
