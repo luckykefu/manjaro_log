@@ -1,105 +1,138 @@
 #!/bin/bash
+set -euo pipefail  # 严格模式
 
 # Shadowsocks 服务器配置脚本
 # 参数：
 #   $1: 密码 (必需)
-#   $2: 端口 (可选，默认 8388)
-#   $3: 加密方式 (可选，默认 aes-256-gcm)
-#   $4: 配置文件名 (可选，默认 config)
+#   $2: 配置名 (可选，默认 config)
+
+readonly SCRIPT_NAME="$(basename "$0")"
+readonly SS_CONFIG_DIR="/etc/shadowsocks"
+readonly DEFAULT_PORT=8388
+readonly DEFAULT_METHOD="aes-256-gcm"
+
+log_info() { echo "ℹ️  $*"; }
+log_success() { echo "✅ $*"; }
+log_error() { echo "❌ 错误: $*" >&2; }
 
 setup_shadowsocks_server() {
     local password="$1"
-    local port="${2:-8388}"
-    local method="${3:-aes-256-gcm}"
-    local config_name="${4:-config}"
+    local config_name="${2:-config}"
+    local server_ip
 
-    # 检查必需参数
-    if [ -z "$password" ]; then
-        echo "❌ 错误: 密码是必需的"
-        echo "用法: $0 <密码> [端口] [加密方式] [配置名]"
+    # 验证参数
+    if [[ -z "$password" ]]; then
+        log_error "密码是必需的"
+        show_help
         return 1
     fi
 
-    echo "🔧 安装 Shadowsocks..."
-    sudo pacman -S shadowsocks --noconfirm --needed
+    # 检查是否为 root
+    if [[ $EUID -ne 0 ]]; then
+        log_error "此脚本需要 root 权限"
+        return 1
+    fi
 
-    echo "📝 创建配置文件..."
-    sudo mkdir -p /etc/shadowsocks
+    log_info "安装 Shadowsocks..."
+    pacman -S shadowsocks --noconfirm --needed || {
+        log_error "安装失败"
+        return 1
+    }
 
-    sudo tee "/etc/shadowsocks/${config_name}.json" > /dev/null << EOF
+    log_info "创建配置文件..."
+    mkdir -p "$SS_CONFIG_DIR"
+
+    cat > "${SS_CONFIG_DIR}/${config_name}.json" << EOF
 {
     "server": "0.0.0.0",
-    "server_port": $port,
+    "server_port": $DEFAULT_PORT,
     "password": "$password",
-    "method": "$method",
+    "method": "$DEFAULT_METHOD",
     "timeout": 300,
-    "fast_open": false,
+    "fast_open": true,
     "mode": "tcp_and_udp"
 }
 EOF
 
-    echo "🚀 启动并设置开机自启..."
-    sudo systemctl enable --now "shadowsocks-server@${config_name}"
+    log_info "启动服务..."
+    systemctl enable --now "shadowsocks-server@${config_name}" || {
+        log_error "服务启动失败"
+        return 1
+    }
 
-    echo "🔥 配置防火墙..."
-    sudo iptables -A INPUT -p tcp --dport "$port" -j ACCEPT
-    sudo iptables -A INPUT -p udp --dport "$port" -j ACCEPT
+    log_info "配置防火墙..."
+    if command -v firewall-cmd &> /dev/null; then
+        # firewalld
+        firewall-cmd --permanent --add-port="${DEFAULT_PORT}/tcp"
+        firewall-cmd --permanent --add-port="${DEFAULT_PORT}/udp"
+        firewall-cmd --reload
+    elif command -v ufw &> /dev/null; then
+        # ufw
+        ufw allow "$DEFAULT_PORT"
+    else
+        # iptables
+        iptables -A INPUT -p tcp --dport "$DEFAULT_PORT" -j ACCEPT
+        iptables -A INPUT -p udp --dport "$DEFAULT_PORT" -j ACCEPT
+        mkdir -p /etc/iptables
+        iptables-save > /etc/iptables/iptables.rules
+    fi
 
-    # 保存防火墙规则
-    sudo mkdir -p /etc/iptables
-    sudo iptables-save > /etc/iptables/iptables.rules
-
-    echo "✅ 部署完成！"
-    echo "📊 服务状态:"
-    sudo systemctl status "shadowsocks-server@${config_name}" --no-pager
-
+    log_success "部署完成！"
+    
+    # 获取服务器 IP
+    server_ip=$(curl -s --max-time 5 ifconfig.me 2>/dev/null || echo "获取失败")
+    
     echo ""
     echo "📋 配置信息:"
-    sudo cat "/etc/shadowsocks/${config_name}.json"
-
+    cat "${SS_CONFIG_DIR}/${config_name}.json"
+    
     echo ""
     echo "🔗 连接信息:"
-    echo "  服务器: $(curl -s ifconfig.me 2>/dev/null || echo '你的服务器IP')"
-    echo "  端口: $port"
+    echo "  服务器: $server_ip"
+    echo "  端口: $DEFAULT_PORT"
     echo "  密码: $password"
-    echo "  加密: $method"
+    echo "  加密: $DEFAULT_METHOD"
+    
+    echo ""
+    echo "📊 服务状态:"
+    systemctl status "shadowsocks-server@${config_name}" --no-pager -l
 }
 
-# 显示帮助
 show_help() {
     cat << EOF
 Shadowsocks 服务器配置工具
 
 用法:
-  $0 <密码> [端口] [加密方式] [配置名]
+  $SCRIPT_NAME <密码> [配置名]
 
 参数:
   密码      必需，连接密码
-  端口      可选，默认 8388
-  加密方式   可选，默认 aes-256-gcm
   配置名    可选，默认 config
 
 示例:
-  $0 mypassword123                    # 使用默认端口和加密
-  $0 mypassword123 9999               # 指定端口
-  $0 mypassword123 9999 chacha20-ietf-poly1305  # 指定加密方式
-  $0 mypassword123 9999 aes-256-gcm myserver     # 指定配置名
+  $SCRIPT_NAME mypassword123
+  $SCRIPT_NAME mypassword123 myserver
 
-常用加密方式:
-  - aes-256-gcm (推荐)
-  - chacha20-ietf-poly1305 (推荐)
-  - aes-128-gcm
+注意:
+  - 需要 root 权限运行
+  - 默认端口: $DEFAULT_PORT
+  - 默认加密: $DEFAULT_METHOD
 EOF
 }
 
-# 检查是否被直接执行
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+# 主程序
+main() {
     case "${1:-help}" in
-        "help"|"-h"|"--help")
+        help|-h|--help)
             show_help
             ;;
         *)
             setup_shadowsocks_server "$@"
             ;;
     esac
+}
+
+# 仅在直接执行时运行
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main "$@"
 fi
