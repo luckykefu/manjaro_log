@@ -1,7 +1,7 @@
 #!/bin/bash
 archlinuxcn_conf() {
 	local PACMAN_FILE=/etc/pacman.conf
-	local Server=${1:-"https://mirrors.ustc.edu.cn/archlinuxcn/\$arch"}
+	local Server=${1:-"https://mirrors.tuna.tsinghua.edu.cn/archlinuxcn/\$arch"}
 
 	# 添加 [archlinuxcn] 配置
 	if ! grep -q "^\[archlinuxcn\]" "$PACMAN_FILE"; then
