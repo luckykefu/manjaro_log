@@ -1,0 +1,17 @@
+{
+  "folders": [
+	{
+		"name": ".amazonq",
+		"path": "../.home/.aws/.amazonq"
+	},
+	{
+		"name": ".manjaro",
+		"path": "."
+	},
+	{
+		"name": "crypto_quant",
+		"path": "../projects_ING/crypto_quant"
+	}
+],
+  "settings": {}
+}
