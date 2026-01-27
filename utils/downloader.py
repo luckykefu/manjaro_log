@@ -37,20 +37,20 @@ def retry(retries: int = 3, delay: int = 1):
     return decorator
 
 
-class GitHubDownloader:
-    """GitHub 下载器，支持链式调用"""
+class Downloader:
+    """下载器，支持链式调用"""
     
-    def __init__(self, repo_url: str, proxy: str | None = None):
-        self.repo_url = repo_url.rstrip('/').split('/releases')[0] if '/releases' in repo_url else repo_url.rstrip('/')
+    def __init__(self, proxy: str | None = None):
         self.proxy = proxy or "socks5h://192.168.0.103:7897"
         self.proxies = {"http": self.proxy, "https": self.proxy}
         self.urls = []
         self.downloaded_files = []
     
     @retry(retries=3)
-    def _fetch_release_urls(self, suffixes: list[str], includes: list[str]):
+    def _fetch_release_urls(self, repo_url: str, suffixes: list[str], includes: list[str]):
         """获取 release 下载链接"""
-        owner, repo = self.repo_url.split('/')[-2:]
+        repo_url = repo_url.rstrip('/').split('/releases')[0] if '/releases' in repo_url else repo_url.rstrip('/')
+        owner, repo = repo_url.split('/')[-2:]
         api_url = f"https://api.github.com/repos/{owner}/{repo}/releases/latest"
         logger.debug(f"{api_url=}")
         
@@ -66,14 +66,14 @@ class GitHubDownloader:
             and all(inc in asset["name"] for inc in includes)
         ]
         
-    def get_urls(self, suffix: str | list[str], include: str | list[str] | None = None):
-        """获取下载链接"""
+    def get_github_urls(self, repo_url: str, suffix: str | list[str], include: str | list[str] | None = None):
+        """获取 GitHub release 下载链接"""
         suffixes = [suffix] if isinstance(suffix, str) else suffix
         includes = [include] if isinstance(include, str) else (include or [])
-        logger.debug(f"{suffixes=}, {includes=}")
+        logger.debug(f"{repo_url=}, {suffixes=}, {includes=}")
         
         try:
-            self.urls = self._fetch_release_urls(suffixes, includes)
+            self.urls = self._fetch_release_urls(repo_url, suffixes, includes)
             logger.info(f"获取到 {len(self.urls)} 个下载链接")
             for url in self.urls:
                 logger.debug(f"URL: {url}")
@@ -83,23 +83,31 @@ class GitHubDownloader:
         return self
     
     @retry(retries=3)
-    def _download_file(self, url: str, filename: Path, temp_file: Path):
+    def _download_file(self, url: str, output_dir: Path):
         """下载单个文件"""
+        # 先发起请求获取重定向后的 URL
+        resp = requests.get(url, proxies=self.proxies, stream=True, timeout=30, allow_redirects=True)
+        final_url = resp.url
+        logger.debug(f"重定向后 URL: {final_url}")
+        
+        filename = output_dir / final_url.split('/')[-1].split('?')[0]
+        temp_file = filename.with_suffix(filename.suffix + '.tmp')
+        
         downloaded_size = temp_file.stat().st_size if temp_file.exists() else 0
         headers = {'Range': f'bytes={downloaded_size}-'} if downloaded_size > 0 else {}
         
         logger.debug(f"开始下载: {url}")
         if downloaded_size > 0:
             logger.info(f"断点续传: {filename.name}, 已下载: {downloaded_size} bytes")
+            resp = requests.get(url, headers=headers, proxies=self.proxies, stream=True, timeout=30, allow_redirects=True)
         
-        resp = requests.get(url, headers=headers, proxies=self.proxies, stream=True, timeout=30)
         logger.debug(f"HTTP 状态码: {resp.status_code}")
         
         if downloaded_size > 0 and resp.status_code != 206:
             logger.warning("不支持断点续传，重新下载")
             downloaded_size = 0
             temp_file.unlink(missing_ok=True)
-            resp = requests.get(url, proxies=self.proxies, stream=True, timeout=30)
+            resp = requests.get(url, proxies=self.proxies, stream=True, timeout=30, allow_redirects=True)
         
         resp.raise_for_status()
         total_size = int(resp.headers.get('content-length', 0)) + downloaded_size
@@ -113,10 +121,18 @@ class GitHubDownloader:
         
         temp_file.rename(filename)
         logger.info(f"下载成功: {filename.name}")
+        return filename
     
-    def download(self, output_dir: str = "~/Downloads"):
-        """下载文件，支持断点续传"""
-        if not self.urls:
+    def download(self, urls: list[str] | str | None = None, output_dir: str = "~/Downloads"):
+        """下载文件，支持断点续传
+        :params:
+            :urls: 自定义下载链接列表或单个链接，如果提供则使用此列表而不是 self.urls
+            :output_dir: 下载目录
+        """
+        if isinstance(urls, str):
+            urls = [urls]
+        download_urls = urls or self.urls
+        if not download_urls:
             logger.error("没有可下载的链接")
             return self
         
@@ -124,18 +140,9 @@ class GitHubDownloader:
         output_dir.mkdir(parents=True, exist_ok=True)
         logger.debug(f"下载目录: {output_dir}")
         
-        for url in self.urls:
-            filename = output_dir / url.split('/')[-1]
-            temp_file = filename.with_suffix(filename.suffix + '.tmp')
-            logger.debug(f"{filename=}, {temp_file=}")
-            
-            if filename.exists():
-                logger.info(f"文件已存在，跳过: {filename.name}")
-                self.downloaded_files.append(filename)
-                continue
-            
+        for url in download_urls:
             try:
-                self._download_file(url, filename, temp_file)
+                filename = self._download_file(url, output_dir)
                 self.downloaded_files.append(filename)
             except Exception as e:
                 logger.error(f"下载异常: {e}")
@@ -182,7 +189,7 @@ class GitHubDownloader:
 
 if __name__ == "__main__":
     # 链式调用示例
-    GitHubDownloader("https://github.com/ollama/ollama") \
-        .get_urls(suffix=".tar.zst", include=["linux", "amd64"]) \
+    Downloader() \
+        .get_github_urls("https://github.com/ollama/ollama", suffix=".tar.zst", include=["linux", "amd64"]) \
         .download(output_dir="~/Downloads") \
         .extract(output_dir="/data/.path/.ollama")
