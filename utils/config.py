@@ -1,97 +1,77 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# >>>>>>>>>>>>>>>配置管理模块>>>>>>>>>>>>>>>>
+"""
+# >>>>>>>>>>>>>>>[ 配置管理模块 ]>>>>>>>>>>>>>>>
+"""
 
-from pathlib import Path
-from typing import Any
-import yaml
 import logging
+from functools import reduce
+from pathlib import Path
+from typing import Any, TypeVar
+import yaml
 from rich.console import Console
 from rich.logging import RichHandler
 
-# >>>>>>>>>>>>>>>全局 console>>>>>>>>>>>>>>>>
-console = Console()
+T = TypeVar('T')
+
 
 class Config:
-    """配置管理类"""
+    """配置管理类（单例）"""
     
-    def __init__(self) -> None:
-        """初始化配置"""
+    _instance: 'Config | None' = None
+    
+    def __new__(cls, config_path: Path | str | None = None) -> 'Config':
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+            cls._instance._initialized = False
+        return cls._instance
+    
+    def __init__(self, config_path: Path | str | None = None) -> None:
+        if self._initialized:
+            return
+        
+        self._path = Path(config_path) if config_path else Path(__file__).parent.parent / "config" / "config.yaml"
         self._data: dict[str, Any] = self._load_config()
+        self._initialized = True
     
     def _load_config(self) -> dict[str, Any]:
         """加载配置文件"""
-        config_path = Path(__file__).parent.parent / "config" / "config.yaml"
-        
         try:
-            with open(config_path, encoding="utf-8") as f:
-                return yaml.safe_load(f) or {}
-        except FileNotFoundError:
-            logger.error(f"配置文件不存在: {config_path}")
-            return {}
-        except yaml.YAMLError as e:
-            logger.error(f"YAML 解析错误: {e}")
-            return {}
-        except Exception as e:
-            logger.error(f"配置加载失败: {e}")
+            return yaml.safe_load(self._path.read_text(encoding="utf-8")) or {}
+        except (FileNotFoundError, yaml.YAMLError, OSError) as e:
+            Console().print(f"[yellow]配置加载失败: {e}[/yellow]")
             return {}
     
-    def get(self, key: str, default: Any = None) -> Any:
-        """获取配置值
-        :params:
-            :key: 配置键，支持点号分隔（如 'database.path'）
-            :default: 默认值
-        :return: 配置值或默认值
-        """
-        value = self._data
-        
-        for k in key.split("."):
-            if not isinstance(value, dict):
-                return default
-            value = value.get(k)
-            if value is None:
-                return default
-        
-        return value
+    def get(self, key: str, default: T = None) -> Any | T:
+        """获取配置值（支持点号分隔）"""
+        try:
+            return reduce(lambda d, k: d[k], key.split("."), self._data)
+        except (KeyError, TypeError):
+            return default
 
 
-# 全局配置实例
+def _setup_logger(cfg: Config) -> logging.Logger:
+    """配置日志记录器"""
+    logging.basicConfig(
+        level=getattr(logging, cfg.get("logger.level", "DEBUG").upper(), logging.DEBUG),
+        format="%(message)s",
+        handlers=[RichHandler(console=Console(), rich_tracebacks=True)],
+        force=True
+    )
+    return logging.getLogger(cfg.get("logger.name", "app"))
+
+
+# >>>>>>>>>>>>>>>>>>>>[ 全局实例 ]>>>>>>>>>>>>>>>
 config = Config()
-
-class Logger:
-    """日志配置类
-    :params:
-        :name: logger 名称
-        :level: 日志级别
-    :return: Logger 实例
-    """
-    
-    def __init__(self, name: str = "app", level: str = config.get("logger.level", "DEBUG").upper()):
-        self.logger = logging.getLogger(name)
-        self.logger.setLevel(level)
-        
-        # >>>>>>>>>>>>>>>只在没有 handlers 时添加>>>>>>>>>>>>>>>>
-        if not self.logger.handlers:
-            handler = RichHandler(console=console, markup=True)
-            self.logger.addHandler(handler)
-            init_mst = f"[bold green]Logger Initialized:[/bold green] [yellow]{name}[/yellow] at level [cyan]{level}[/cyan]"
-            self.logger.info(init_mst)
-    
-    def __getattr__(self, name: str):
-        """代理 logger 的所有方法"""
-        return getattr(self.logger, name)
-
-# >>>>>>>>>>>>>>>全局 logger>>>>>>>>>>>>>>>>
-logger = Logger()
+logger = _setup_logger(config)
 
 
 if __name__ == "__main__":
-    # >>>>>>>>>>>>>>>>>>>>使用示例>>>>>>>>>>>>>>>>
+    # >>>>>>>>>>>>>>>>>>>>[ 使用示例 ]>>>>>>>>>>>>>>>
     from rich import print_json
     
+    print_json(data=config._data)
     logger.debug("调试信息")
     logger.info("普通信息")
     logger.warning("警告信息")
     logger.error("错误信息")
-    
-    print_json(data=config._data)

@@ -1,9 +1,0 @@
-openrouter:
-  api_key: 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
-  model: mistralai/devstral-2512:free
-  base_url: https://openrouter.ai/api/v1
-modelscope:
-  api_key: ms-b6d4f4c9-76b7-4568-b32b-4a01f279f387
-  model: deepseek-ai/DeepSeek-V3.2
-ollama:
-  model: llama2-7b-chat
