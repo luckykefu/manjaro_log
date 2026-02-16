@@ -9,7 +9,6 @@
 
 ## 代理配置
 
-- Shell: `all_proxy="socks5://192.168.0.103:7897"`
 - Python: `socks5h://192.168.0.103:7897`
 
 ## Python 规则
@@ -25,10 +24,6 @@
 # 安装包
 sudo pacman -S --needed --noconfirm pkg
 
-# 创建 conda 环境
-conda env list | grep -q "^env " || conda create --name env python ipykernel pysocks -y
-
-# 运行 cmd 时,必须先激活 conda 环境
 ```
 
 ## 日志规范
