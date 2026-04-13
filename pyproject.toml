@@ -12,6 +12,7 @@ dependencies = [
     "ollama>=0.6.1",
     "pandas>=3.0.0",
     "pysocks>=1.7.1",
+    "pytest>=9.0.3",
     "pyyaml>=6.0.3",
     "rich>=14.3.2",
 ]
@@ -19,3 +20,10 @@ dependencies = [
 [[tool.uv.index]]
 url = "https://pypi.tuna.tsinghua.edu.cn/simple"
 default = true
+
+[tool.uv.workspace]
+members = [
+    "project-skills/uv",
+    "project-skills/skills-creator",
+    "project-skills/freqtrade",
+]

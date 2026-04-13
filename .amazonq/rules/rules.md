@@ -73,14 +73,3 @@ if __name__ == "__main__":
     # [ 使用示例 ]
     example_function(param1="test", param2=123)
 ```
-
-## 项目结构
-
-```
-project/
-├── config/
-    └────── config.yaml # 配置文件
-├── utils/              # 工具函数
-    ├────── __init__.py
-    └───────config.py
-```

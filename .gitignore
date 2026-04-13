@@ -1,3 +1,5 @@
 **/floccus.export*.json
 **/*.log
 **/*.yaml
+/.venv/
+**/*.env
