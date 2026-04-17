@@ -5,40 +5,36 @@ description: Python 编码规范与技巧
 
 # Python Skill
 
-### 函数都要有简单的逻辑描述
+## 可读性
+- 函数有简单 docstring, 包含逻辑和参数
+- 命名自解释，无魔法数字，用常量替代
+- 函数单一职责，< 20 行
 
-### 使用高级表达式
+## 可维护性
+- DRY：重复逻辑抽函数
+- 使用高级表达式（推导式/三元/解包）
+- 参数用 `*args / **kwargs`
 
-### 函数参数用 `*args / **kwargs`
+## 可靠性
+- 类型注解全覆盖
+- 运行时用 `assert isinstance(x, get_args(T))` 检查
+- 明确错误信息，不静默失败（禁用裸 `except: return None`）
 
-```python
-def fn(*args, **kwargs) -> None:
-    print(args)   # tuple
-    print(kwargs) # dict
-    return None
+## 性能
+- 重复计算用 `@lru_cache`
+- 联网加重试机制
+- 大数据用生成器替代列表推导
+- 循环外提前计算不变量
 
-fn(1, 2, a=3)  # args=(1,2)  kwargs={"a":3}
+## 可测试性
+- 依赖注入替代全局状态，方便 mock
 
-### 参数解包
-args = [1, 2]
-kwargs = {"c": 3}
-fn(*args, **kwargs)
-```
+## 评估指标
 
-### 运行时类型检查
-
-```python
-from typing import get_args
-def fn(x: str | list):
-    assert isinstance(x, get_args(str | list)), f"期望 str|list，得到 {type(x)}"
-```
-
-### 生成器惰性计算
-
-### 计算相关的fn使用缓存
-
-```python
-from functools import lru_cache
-@lru_cache(maxsize=128)
-def fib(n): return fib(n-1)+fib(n-2) if n>1 else n
-```
+| 维度 | 标准 | 工具 |
+|------|------|------|
+| 函数长度 | < 20 行 | pylint |
+| 圈复杂度 | < 10 | radon |
+| 重复率 | < 5% | pylint |
+| 类型注解 | 全覆盖 | mypy |
+| 测试覆盖 | > 80% | pytest-cov |
