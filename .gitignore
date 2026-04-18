@@ -1,5 +1,11 @@
+# 格式说明:
+# **/pattern  — 匹配所有子目录
+# *.ext       — 匹配指定扩展名
+# /dir/       — 仅匹配根目录
+
 **/floccus.export*.json
 **/*.log
 **/*.yaml
 /.venv/
 **/*.env
+**/skills
