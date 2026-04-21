@@ -38,3 +38,5 @@ description: Python 编码规范与技巧
 | 重复率 | < 5% | pylint |
 | 类型注解 | 全覆盖 | mypy |
 | 测试覆盖 | > 80% | pytest-cov |
+
+## 操作notebook使用 nbformat 库
