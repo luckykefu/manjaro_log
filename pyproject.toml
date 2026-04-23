@@ -5,25 +5,9 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "ccxt>=4.5.38",
-    "httpx>=0.28.1",
     "ipykernel>=7.2.0",
-    "mcp>=1.27.0",
-    "ollama>=0.6.1",
-    "pandas>=3.0.0",
-    "pysocks>=1.7.1",
-    "pytest>=9.0.3",
-    "pyyaml>=6.0.3",
-    "rich>=14.3.2",
 ]
 
 [[tool.uv.index]]
 url = "https://pypi.tuna.tsinghua.edu.cn/simple"
 default = true
-
-[tool.uv.workspace]
-members = [
-    "project-skills/uv",
-    "project-skills/skills-creator",
-    "project-skills/freqtrade",
-]

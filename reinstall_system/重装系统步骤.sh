@@ -55,7 +55,7 @@ bash install_fonts.sh
 bash cfg_kde.sh
 
 ## 安装软件
-sudo pacman -S --noconfirm --needed haveged aria2 mpv ffmpeg telegram-desktop obs-studio qbittorrent ventoy nodejs npm
+sudo pacman -S --noconfirm --needed haveged aria2 mpv ffmpeg telegram-desktop obs-studio qbittorrent ventoy nodejs npm unzip
 sudo systemctl enable --now haveged
 sudo pacman -Syyu --noconfirm
 yay -Syyu --noconfirm
@@ -70,3 +70,6 @@ sudo pacman -S --needed --noconfirm \
     xf86-video-amdgpu \
     rocm-opencl-runtime \
     rocm-hip-runtime
+
+sudo timedatectl set-local-rtc 0
+sudo timedatectl set-timezone UTC
