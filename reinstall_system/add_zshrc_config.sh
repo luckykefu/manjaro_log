@@ -14,6 +14,7 @@ add_zshrc_config() {
     done <<'EOF'
 export UV_DEFAULT_INDEX="https://pypi.tuna.tsinghua.edu.cn/simple"
 export UV_CACHE_DIR="/data/.uv-cache"
+export UV_LINK_MODE=copy
 export PATH="$PATH:/data/.path/.appimage"
 export HTTPS_PROXY="socks5h://192.168.0.103:7897"
 export HTTP_PROXY="socks5h://192.168.0.103:7897"
