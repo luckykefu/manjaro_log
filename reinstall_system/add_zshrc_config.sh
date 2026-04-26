@@ -10,7 +10,7 @@ add_zshrc_config() {
         [[ -z "${line}" ]] && continue
         grep -Fxq "${line}" "${zshrc}" && continue
         echo "${line}" >> "${zshrc}"
-        ((added++))
+        ((added++)) || true
     done <<'EOF'
 export UV_DEFAULT_INDEX="https://pypi.tuna.tsinghua.edu.cn/simple"
 export UV_CACHE_DIR="/data/.uv-cache"

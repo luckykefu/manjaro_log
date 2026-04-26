@@ -10,7 +10,7 @@ set_mirror() {
     # 写入新镜像配置
     sudo tee /etc/pacman.d/mirrorlist <<EOF
 # China mirrors tsinghua
-Server = $url
+Server = ${url}
 EOF
     
     echo "镜像源已设置为: $url"

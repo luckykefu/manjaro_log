@@ -9,7 +9,7 @@ config_kde_wallpaper() {
     
     # 查找桌面容器
     local found=0
-    grep -oP '^\[Containments\]\[\K\d+(?=\])' "${config_file}" | sort -u | while read -r c_id; do
+    while read -r c_id; do
         local location=$(kreadconfig6 --file "${config_file}" --group "Containments" --group "${c_id}" --key "location")
         local plugin=$(kreadconfig6 --file "${config_file}" --group "Containments" --group "${c_id}" --key "plugin")
         
@@ -30,7 +30,7 @@ config_kde_wallpaper() {
             echo "✓ 已配置 Bing 每日壁纸"
             found=1
         fi
-    done
+    done < <(grep -oP '^\[Containments\]\[\K\d+(?=\])' "${config_file}" | sort -u)
     
     [[ ${found} -eq 0 ]] && echo "⚠ 未找到桌面容器"
     

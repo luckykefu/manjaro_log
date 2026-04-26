@@ -28,6 +28,6 @@ EOF
 }
 
 # 使用示例
-add_autostart "cryptomator"
-add_autostart "keepassxc"
-add_autostart "clash-verge"
+add_autostart "cryptomator" || true
+add_autostart "keepassxc" || true
+add_autostart "clash-verge" || true

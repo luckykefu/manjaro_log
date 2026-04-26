@@ -1,4 +1,6 @@
 #!/bin/bash
+set -euo pipefail
+cd "$(dirname "$0")"  # 确保在脚本目录下执行
 
 ## 制作 USB LIVE
 ## 下载 Manjaro KDE ISO

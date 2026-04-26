@@ -18,8 +18,10 @@ gen_ssh_key() {
     
     # 设置权限
     chmod 700 "${ssh_dir}"
+    shopt -s nullglob
     chmod 600 "${ssh_dir}"/id_*
     chmod 644 "${ssh_dir}"/*.pub
+    shopt -u nullglob
     
     # 链接到主目录
     ln -sf "${ssh_dir}" ~/.ssh
