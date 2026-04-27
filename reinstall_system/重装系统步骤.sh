@@ -27,6 +27,8 @@ kwriteconfig6 --file kwinrc --group Wayland --key 'InputMethod' /usr/share/appli
 
 ## 密钥 & 更新
 sudo pacman -Sy --needed --noconfirm base-devel yay uv
+uv tool install ruff
+uv tool install mypy
 sudo pacman -S --needed --noconfirm manjaro-keyring archlinux-keyring archlinuxcn-keyring
 sudo pacman-key --init
 sudo pacman-key --populate archlinux manjaro archlinuxcn
