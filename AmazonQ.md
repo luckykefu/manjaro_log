@@ -4,11 +4,12 @@
 
 使用 chinese 对话
 
-对话格式如下
+对话格式如下:
 需求分析: ...
 解决方案: 1. 2. 3.
 
-是否保存文件,保存到哪里都需要询问
+经过用户确定在执行方案
+是否保存文件,保存到哪里必须经过同意!!!
 
 ---
 
@@ -16,7 +17,7 @@
 
 ```yaml
 system: manjaro
-shell: zsh
+shell rc: $HOME/.zshrc
 python-env: uv run
 cpu: intel 12400f
 gpu: amd redeon rx 6750 GRE 12GB
@@ -27,12 +28,15 @@ gpu: amd redeon rx 6750 GRE 12GB
 ## 行为规范
 
 - 没让改的地方绝对不改
-- 和py库有关的问题,首先查询源码库再回答
+- 和py库有关的问题,必须查询源码库再回答
 - 操作notebook时,json.load
 - test 文件统一放在 test 文件夹下
-- 修改文件前先读取文件
-- 库相关错误,读取源码之后再回答
-- 每个功能单独一个函数
+- ide 里运行shell需要加上代理
+
+```bash
+export HTTPS_PROXY="socks5h://192.168.0.103:7897"
+export HTTP_PROXY="socks5h://192.168.0.103:7897"
+```
 
 ---
 
@@ -41,8 +45,9 @@ gpu: amd redeon rx 6750 GRE 12GB
 > 可读性
 
 - 函数有简单 docstring, 包含逻辑和参数
+- 步骤有注释
 - 命名自解释，无魔法数字，用常量替代
-- 函数单一职责，< 20 行,复杂函数拆分为多个子函数
+- 函数单一职责，一个函数只负责处理一个事务.
 
 > 可维护性
 
