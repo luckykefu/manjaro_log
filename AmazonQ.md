@@ -34,8 +34,8 @@ gpu: amd redeon rx 6750 GRE 12GB
 - ide 里运行shell需要加上代理
 
 ```bash
-export HTTPS_PROXY="socks5h://192.168.0.103:7897"
-export HTTP_PROXY="socks5h://192.168.0.103:7897"
+export https_proxy=socks5h://127.0.0.1:1080 http_proxy=socks5h://127.0.0.1:1080
+
 ```
 
 ---
