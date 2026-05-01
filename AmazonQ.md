@@ -27,6 +27,7 @@ gpu: amd redeon rx 6750 GRE 12GB
 
 ## 行为规范
 
+- 一切皆高级,简洁
 - 没让改的地方绝对不改
 - 和py库有关的问题,必须查询源码库再回答
 - 操作notebook时,json.load
