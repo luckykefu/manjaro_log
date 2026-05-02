@@ -1,51 +1,53 @@
 #!/bin/bash
 # Shadowsocks 服务器一键配置
-# 用法: $0 <密码> [端口=8388] [加密=aes-256-gcm] [配置名=config]
+# 用法: setup_ss_server <password> [port=8388]
 
 set -euo pipefail
 
-PASSWORD="${1:?用法: $0 <密码> [端口] [加密方式] [配置名]}"
-PORT="${2:-8388}"
-METHOD="${3:-aes-256-gcm}"
-NAME="${4:-config}"
-CONFIG="/etc/shadowsocks-rust/${NAME}.json"
-SERVICE="shadowsocks-rust-server@${NAME}"
+setup_ss_server() {
+    # $1: password (可选, 默认自动生成), $2: port (可选, 默认8388)
+    local PASSWORD="${1:-$(openssl rand -base64 32)}"
+    local PORT="${2:-8388}"
+    local NAME=config
+    local CONFIG="/etc/shadowsocks-rust/${NAME}.json"
+    local SERVICE="shadowsocks-rust-server@${NAME}"
 
-[[ "$PORT" =~ ^[0-9]+$ ]] && (( PORT >= 1 && PORT <= 65535 )) \
-    || { echo "❌ 端口无效: $PORT"; exit 1; }
+    echo "📦 安装 shadowsocks-rust..."
+    sudo pacman -S shadowsocks-rust --noconfirm --needed
 
-echo "📦 安装 shadowsocks-rust..."
-sudo pacman -S shadowsocks-rust --noconfirm --needed
-
-echo "📝 写入配置 $CONFIG..."
-sudo mkdir -p /etc/shadowsocks-rust
-sudo tee "$CONFIG" > /dev/null <<EOF
+    echo "📝 写入配置 $CONFIG..."
+    sudo mkdir -p /etc/shadowsocks-rust
+    sudo tee "$CONFIG" > /dev/null <<EOF
 {
     "server": "0.0.0.0",
     "server_port": $PORT,
     "password": "$PASSWORD",
-    "method": "$METHOD",
+    "method": "2022-blake3-aes-256-gcm",
     "timeout": 300,
-    "fast_open": false,
+    "fast_open": true,
     "mode": "tcp_and_udp"
 }
 EOF
 
-echo "🚀 启动服务..."
-sudo systemctl disable --now "shadowsocks-server@${NAME}" 2>/dev/null || true
-sudo systemctl enable --now "$SERVICE"
+    echo "🚀 启动服务..."
+    sudo systemctl disable --now "shadowsocks-server@${NAME}" 2>/dev/null || true
+    sudo systemctl enable --now "$SERVICE"
 
-echo "🔥 开放防火墙端口 $PORT..."
-sudo iptables -A INPUT -p tcp --dport "$PORT" -j ACCEPT
-sudo iptables -A INPUT -p udp --dport "$PORT" -j ACCEPT
-sudo mkdir -p /etc/iptables
-sudo iptables-save | sudo tee /etc/iptables/iptables.rules > /dev/null
+    echo "🔥 开放防火墙端口 $PORT..."
+    if command -v ufw &>/dev/null && ufw status | grep -q 'active'; then
+        sudo ufw allow "$PORT/tcp"
+        sudo ufw allow "$PORT/udp"
+    else
+        sudo iptables -A INPUT -p tcp --dport "$PORT" -j ACCEPT
+        sudo iptables -A INPUT -p udp --dport "$PORT" -j ACCEPT
+    fi
 
-echo "✅ 完成！服务状态:"
-sudo systemctl status "$SERVICE" --no-pager
+    echo "✅ 完成！服务状态:"
+    sudo systemctl status "$SERVICE" --no-pager
 
-PUBLIC_IP=$(curl -s ifconfig.me 2>/dev/null || echo '<服务器IP>')
-echo -e "\n🔗 连接信息: IP=$PUBLIC_IP  端口=$PORT  密码=$PASSWORD  加密=$METHOD"
+    echo -e "\n📋 配置文件 $CONFIG:"
+    sudo cat "$CONFIG"
+    echo -e "\n🔑 密码: $PASSWORD"
+}
 
-echo -e "\n📋 配置文件 $CONFIG:"
-sudo cat "$CONFIG"
+setup_ss_server "$@"

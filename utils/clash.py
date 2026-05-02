@@ -1,10 +1,13 @@
 """SS 配置转 Clash yaml 工具
-用法: python clash.py <IP> <ss_config_json> [节点名] [输出文件]
+用法: uv run clash.py <ip> [remote_cfg=/etc/shadowsocks-rust/config.json] [节点名] [输出文件]
 """
 import json
+import subprocess
 import sys
-import yaml
+import tempfile
 from pathlib import Path
+
+import yaml
 
 DEFAULT_RULES = [
     "DOMAIN-SUFFIX,local,DIRECT",
@@ -16,7 +19,19 @@ DEFAULT_RULES = [
     "MATCH,Proxy",
 ]
 
-def generate(ip: str, ss_config: dict, node: str = "SS节点", out: str = "/tmp/clash_config.yaml"):
+REMOTE_CFG = "/etc/shadowsocks-rust/config.json"
+
+
+def fetch(ip: str, remote_cfg: str = REMOTE_CFG) -> dict:
+    """scp 拉取远程 ss 配置文件，返回解析后的 dict"""
+    with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as f:
+        tmp = f.name
+    subprocess.run(["scp", f"root@{ip}:{remote_cfg}", tmp], check=True)
+    return json.loads(Path(tmp).read_text())
+
+
+def generate(ip: str, ss_config: dict, node: str = "SS节点", out: str = "/tmp/clash_config.yaml") -> str:
+    """ss_config 转 clash yaml，写入 out 路径"""
     proxy = {
         "name": node, "type": "ss",
         "server": ip,
@@ -45,12 +60,14 @@ def generate(ip: str, ss_config: dict, node: str = "SS节点", out: str = "/tmp/
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 3:
-        print("用法: python clash.py <IP> <ss_config_json> [节点名] [输出文件]")
+    if len(sys.argv) < 2:
+        print("用法: uv run clash.py <ip> [remote_cfg] [节点名] [输出文件]")
         sys.exit(1)
+    _ip = sys.argv[1]
+    _cfg = fetch(_ip, sys.argv[2] if len(sys.argv) > 2 else REMOTE_CFG)
     generate(
-        ip=sys.argv[1],
-        ss_config=json.loads(sys.argv[2]),
+        ip=_ip,
+        ss_config=_cfg,
         node=sys.argv[3] if len(sys.argv) > 3 else "SS节点",
         out=sys.argv[4] if len(sys.argv) > 4 else "/tmp/clash_config.yaml",
     )
