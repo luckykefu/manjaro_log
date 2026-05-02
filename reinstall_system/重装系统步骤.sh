@@ -8,12 +8,13 @@ cd "$(dirname "$0")"  # 确保在脚本目录下执行
 ## 重启安装 Manjaro KDE
 
 ## 配置系统
-bash add_zshrc_config.sh
-bash link_to_home.sh
+bash 000_sudo_nopassword.sh
+bash 001_add_zshrc_config.sh
+bash 002_link_to_home.sh
 gpg --gen-keys
-bash set_mirror.sh
-bash cfg_git.sh
-bash gen_ssh_key.sh
+bash 003_set_mirror.sh
+bash 004_cfg_git.sh
+bash 005_gen_ssh_key.sh
 
 ## 输入法
 sudo pacman -S --needed --noconfirm \
@@ -29,11 +30,10 @@ kwriteconfig6 --file kwinrc --group Wayland --key 'InputMethod' /usr/share/appli
 sudo pacman -Sy --needed --noconfirm base-devel yay uv
 uv tool install ruff
 uv tool install mypy
-sudo pacman -S --needed --noconfirm manjaro-keyring archlinux-keyring archlinuxcn-keyring
+sudo pacman -S --needed --noconfirm manjaro-keyring archlinux-keyring
 sudo pacman-key --init
-sudo pacman-key --populate archlinux manjaro archlinuxcn
-sudo pacman -Syyu --noconfirm
-yay -Syyu --noconfirm
+sudo pacman-key --populate archlinux manjaro
+bash 006_update.sh
 
 ## AUR 软件
 yay -S --needed --noconfirm \
@@ -41,7 +41,7 @@ yay -S --needed --noconfirm \
     clash-verge-rev-bin \
     keepassxc \
     visual-studio-code-bin
-bash add_autostart.sh
+bash 007_add_autostart.sh
 
 # vscode       : 3124568493@qq.com
 # cryptomator  : /data/.cryptomator
@@ -53,12 +53,12 @@ bash add_autostart.sh
 systemsettings kcm_kscreen
 kcmshell6 kcm_lookandfeel
 systemctl is-active --quiet bluetooth && sudo systemctl disable --now bluetooth || true
-bash install_themes.sh
-bash config_kde_clock.sh
-bash config_kde_wallpaper.sh
-bash config_kde_launchers.sh
-bash install_fonts.sh
-bash cfg_kde.sh
+bash 008_install_themes.sh
+bash 009_config_kde_clock.sh
+bash 010_config_kde_wallpaper.sh
+bash 011_config_kde_launchers.sh
+bash 012_install_fonts.sh
+bash 013_cfg_kde.sh
 
 ## 安装软件
 sudo pacman -S --needed --noconfirm \

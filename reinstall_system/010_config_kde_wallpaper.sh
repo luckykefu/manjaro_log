@@ -2,41 +2,36 @@
 set -euo pipefail
 
 config_kde_wallpaper() {
+    # 设置 KDE 桌面壁纸为 Bing 每日壁纸（org.kde.potd）
     local config_file="${HOME}/.config/plasma-org.kde.plasma.desktop-appletsrc"
-    
-    # 检查配置文件
+
     [[ ! -f "${config_file}" ]] && { echo "✗ 配置文件不存在" >&2; return 1; }
-    
-    # 查找桌面容器
+
     local found=0
     while read -r c_id; do
         local location=$(kreadconfig6 --file "${config_file}" --group "Containments" --group "${c_id}" --key "location")
         local plugin=$(kreadconfig6 --file "${config_file}" --group "Containments" --group "${c_id}" --key "plugin")
-        
-        if [[ "${location}" == "0" && "${plugin}" == "org.kde.plasma.folder" ]]; then
+
+        if [[ "${location}" == "0" && "${plugin}" == "org.kde.plasma.folder" ]]; then  # location=0 为桌面容器
             echo "→ 找到桌面容器: Containment=${c_id}"
-            
-            # 设置壁纸插件为 org.kde.potd
+
             kwriteconfig6 --file "${config_file}" \
                 --group "Containments" --group "${c_id}" \
-                --key "wallpaperplugin" "org.kde.potd"
-            
-            # 配置 Bing 每日壁纸
+                --key "wallpaperplugin" "org.kde.potd"  # 每日一图插件
+
             kwriteconfig6 --file "${config_file}" \
                 --group "Containments" --group "${c_id}" \
                 --group "Wallpaper" --group "org.kde.potd" --group "General" \
-                --key "Provider" "bing"
-            
+                --key "Provider" "bing"  # 使用 Bing 图源
+
             echo "✓ 已配置 Bing 每日壁纸"
             found=1
         fi
     done < <(grep -oP '^\[Containments\]\[\K\d+(?=\])' "${config_file}" | sort -u)
-    
+
     [[ ${found} -eq 0 ]] && echo "⚠ 未找到桌面容器"
-    
-    # 重启 Plasma 使配置生效
-    echo "→ 重启 Plasma Shell..."
-    kquitapp6 plasmashell && kstart plasmashell &>/dev/null &
+
+    kquitapp6 plasmashell && kstart plasmashell &>/dev/null &  # 重启 Plasma 生效
     echo "✓ 配置完成"
 }
 

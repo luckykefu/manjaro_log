@@ -2,23 +2,23 @@
 set -euo pipefail
 
 cfg_git() {
+    # 配置 git 全局用户信息和 GPG 签名（密钥存在时自动启用）
+    # $1: name (可选, 默认 kefu), $2: email (可选)
     local name="${1:-kefu}"
     local email="${2:-19157521820@163.com}"
-    
-    # 获取 GPG 签名密钥
+
+    # 查找该 email 对应的 GPG 私钥 ID
     local signingkey=$(gpg --list-secret-keys --keyid-format SHORT "$email" 2>/dev/null | grep sec | awk '{print $2}' | cut -d'/' -f2 | head -1)
-    
-    # 配置 Git
+
     git config --global user.name "$name"
     git config --global user.email "$email"
-    git config --global init.defaultBranch "main"
-    git config --global credential.helper "store"
-    
-    # 配置 GPG 签名(如果密钥存在)
+    git config --global init.defaultBranch "main"   # 默认分支名
+    git config --global credential.helper "store"   # 凭证持久化到磁盘
+
     if [[ -n "$signingkey" ]]; then
         git config --global gpg.program "gpg"
         git config --global user.signingkey "$signingkey"
-        git config --global commit.gpgsign "false"
+        git config --global commit.gpgsign "false"  # 配置密钥但不强制签名
         echo "✓ Git configured with GPG key: $signingkey"
     else
         echo "⚠ 未找到 GPG 密钥,跳过签名配置"
