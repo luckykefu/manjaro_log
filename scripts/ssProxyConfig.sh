@@ -1,10 +1,16 @@
 #!/bin/bash
 # 拉取远程 ss 服务端配置，转为本地 sslocal 配置并启动
 # 用法: ss_local <ip> [remote_config=/etc/shadowsocks-rust/config.json]
-
-set -euo pipefail
+install_deps() {
+    local pkgs=()
+    command -v sslocal >/dev/null 2>&1 || pkgs+=(shadowsocks-rust)
+    command -v jq >/dev/null 2>&1 || pkgs+=(jq)
+    command -v scp >/dev/null 2>&1 || pkgs+=(openssh)
+    [ ${#pkgs[@]} -gt 0 ] && sudo pacman -Sy --noconfirm --needed"${pkgs[@]}"
+}
 
 ss_local() {
+    install_deps
     local IP="${1:?'ip is required'}"
     local REMOTE_CFG="${2:-/etc/shadowsocks-rust/config.json}"
     local CFG=$HOME/.shadowsocks/config.json
@@ -33,9 +39,14 @@ ss_local() {
     echo "sslocal pid: $(cat "$PID")"
     cat "$CFG"
 
-    # 测试代理连通性
+    # 测试代理连通性（带启动等待）
     echo "🔗 测试代理..."
-    curl --socks5-hostname 127.0.0.1:1080 https://www.google.com -I --max-time 10 -s -o /dev/null -w "%{http_code}\n"
+    for i in $(seq 10); do
+        code=$(curl --socks5-hostname 127.0.0.1:1080 https://www.google.com -I --max-time 5 -s -o /dev/null -w "%{http_code}" 2>/dev/null || echo "000")
+        [ "$code" != "000" ] && break
+        sleep 1
+    done
+    echo "$code"
 }
 
 ss_local "$@"

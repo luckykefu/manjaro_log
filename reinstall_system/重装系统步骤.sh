@@ -36,6 +36,7 @@ sudo pacman-key --populate archlinux manjaro
 bash 006_update.sh
 
 ## AUR 软件
+sudo pacman -Sy --needed --noconfirm base-devel yay
 yay -S --needed --noconfirm \
     cryptomator-bin \
     clash-verge-rev-bin \
