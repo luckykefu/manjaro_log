@@ -12,17 +12,17 @@ lookandfeeltool -a org.manjaro.breath-dark.desktop
 
 # ── Git / SSH ──
 info "配置 Git..."
-bash scripts/gitConfig.sh
+scripts/gitConfig.sh
 
 info "配置 SSH..."
-bash scripts/sshConfig.sh
+scripts/sshConfig.sh
 
 info "cfg gpg_gen"
-bash scripts/gpg_gen.sh "kefu" "19157521820@163.com" "lkf.Gpg.mima3"
+scripts/gpg_gen.sh "kefu" "19157521820@163.com" "lkf.Gpg.mima3"
 
 # ── SS 代理 ──
 info "启动 SS 代理..."
-bash scripts/ssProxyConfig.sh 202.182.112.91
+scripts/ssProxyConfig.sh 202.182.112.91
 
 # ── 系统包 ──
 info "安装系统依赖..."
