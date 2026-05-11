@@ -19,7 +19,7 @@
 ```yaml
 system: manjaro
 shell rc: $HOME/.zshrc
-python-env: uv run
+rust-build: cargo build --release
 cpu: intel 12400f
 gpu: amd redeon rx 6750 GRE 12GB
 ```
@@ -33,10 +33,10 @@ gpu: amd redeon rx 6750 GRE 12GB
 
 ---
 
-# rust 编码规范
+# Rust 编码规范
 
 - rs文件格式:
-  - docstring完整,必须有单元测试,涵盖边界和真实测试案例,
+  - docstring完整,必须有单元测试,涵盖边界和真实测试案例
   - 函数注释清晰简洁
   - 文件职责单一
   - 文件命名必须直观展示其功能,如 convert (NO!),csv2parquet(YES!!!)
@@ -44,8 +44,9 @@ gpu: amd redeon rx 6750 GRE 12GB
 - 工业级项目架构设计
 - 每次修改文件之后的动作:
   - cargo fmt
-  - cargo test --xxx
-  - 更新git,(must check ../.git ,if it exist, cd to it,and then git ,ban submodel)
+  - cargo test
+  - cargo clippy
+  - cargo build --release
 - 改动之前必须询问我你理解的意思是否准确
 
 ---
