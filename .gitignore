@@ -9,3 +9,7 @@
 /.venv/
 **/*.env
 **/skills
+
+# Added by cargo
+
+/target
