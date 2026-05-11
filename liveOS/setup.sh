@@ -32,7 +32,7 @@ bash ../scripts/ssProxyConfig.sh 202.182.112.91
 
 # ── 系统包 ──
 info "安装系统依赖..."
-sudo pacman -Sy --needed --noconfirm base-devel yay keepassxc rustup
+sudo pacman -Sy --needed --noconfirm base-devel yay keepassxc rust
 
 rustup default stable
 # ── AUR 包 ──
