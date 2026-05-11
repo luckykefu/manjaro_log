@@ -17,6 +17,7 @@ ss_local() {
     local PID=$HOME/.shadowsocks/ss.pid
     local LOG=$HOME/.shadowsocks/ss.log
 
+    sudo pacman -Sy --needed --noconfirm shadowsocks-rust
     mkdir -p "$(dirname "$CFG")"
 
     # 拉取远程配置，提取 server_port/password/method

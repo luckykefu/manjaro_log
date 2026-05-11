@@ -1,7 +1,10 @@
 #!/bin/bash
+#!/bin/bash
+set -euo pipefail
+cd "$(dirname "$0")/.."  # 确保在脚本目录下执行
 DIRS=(
-    /run/media/manjaro/data/.cryptomator
-    /run/media/manjaro/data/.manjaro
+    "$(dirname "$0")/.."
+    "$(dirname "$0")/../../.cryptomator"
 )
 for DIR in "${DIRS[@]}"; do
   if [[ -d "$DIR/.git" ]]; then

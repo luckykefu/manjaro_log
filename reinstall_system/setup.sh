@@ -1,0 +1,34 @@
+#!/bin/bash
+set -euo pipefail
+cd "$(dirname "$0")/.."  # 确保在脚本目录下执行
+info()  { echo -e "\e[1;34m[*]\e[0m $*"; }
+ok()    { echo -e "\e[1;32m[✓]\e[0m $*"; }
+skip()  { echo -e "\e[1;33m[-]\e[0m $*"; }
+
+sudo pacman-mirrors -c China
+sudo pacman -Sy --noconfirm
+sudo systemctl enable fstrim.timer
+# ── Git / SSH ──
+info "配置 Git..."
+bash scripts/gitConfig.sh
+
+info "配置 SSH..."
+bash scripts/sshConfig.sh
+info "cfg gpg_gen"
+bash scripts/gpg_gen.sh "kefu" "19157521820@163.com" "lkf.Gpg.mima3"
+# ── SS 代理 ──
+info "启动 SS 代理..."
+bash scripts/ssProxyConfig.sh 202.182.112.91
+# ── 系统包 ──
+info "安装系统依赖..."
+sudo pacman -S --needed --noconfirm base-devel yay keepassxc rust zed cryptomator
+# ── AUR 包 ──
+info "安装 AUR 包 (通过代理)..."
+ALL_PROXY=socks5://127.0.0.1:1080 yay -S --needed --noconfirm clash-verge-rev-bin cryptomator-bin
+bash scripts/source_shrc.sh
+ALL_PROXY=socks5://127.0.0.1:1080 bash scripts/app_update.sh https://github.com/cryptomator/cryptomator AppImage
+bash scripts/setup_fcitx5.sh
+bash scripts/update.sh
+systemsettings kcm_kscreen
+bash scripts/012_install_fonts.sh
+bash scripts/add_autostart.sh
