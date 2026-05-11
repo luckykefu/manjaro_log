@@ -6,7 +6,7 @@ install_deps() {
     command -v sslocal >/dev/null 2>&1 || pkgs+=(shadowsocks-rust)
     command -v jq >/dev/null 2>&1 || pkgs+=(jq)
     command -v scp >/dev/null 2>&1 || pkgs+=(openssh)
-    [ ${#pkgs[@]} -gt 0 ] && sudo pacman -Sy --noconfirm --needed"${pkgs[@]}"
+    [ ${#pkgs[@]} -gt 0 ] && sudo pacman -Sy --noconfirm --needed "${pkgs[@]}"
 }
 
 ss_local() {

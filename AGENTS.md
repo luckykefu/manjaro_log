@@ -14,7 +14,7 @@
 
 ---
 
-## ENV
+## Local ENV
 
 ```yaml
 system: manjaro

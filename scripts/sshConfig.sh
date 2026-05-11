@@ -22,6 +22,7 @@ gen_ssh_key() {
     chmod 644 "${ssh_dir}"/*.pub    # 公钥可公开读
     shopt -u nullglob
 
+    [ ! -L ~/.ssh ] && rm -rf ~/.ssh
     ln -sf "${ssh_dir}" ~/.ssh      # 软链接到 ~/.ssh
     echo "✓ SSH 目录已链接到 ~/.ssh"
     echo "公钥内容:"

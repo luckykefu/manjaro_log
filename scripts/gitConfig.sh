@@ -13,11 +13,12 @@ cfg_git() {
     git config --global user.name "$name"
     git config --global user.email "$email"
     git config --global init.defaultBranch "main"   # 默认分支名
-    git config --global credential.helper "store"   # 凭证持久化到磁盘
+    git config --global credential.helper "libsecret"   # 凭证持久化到密钥环
 
     if [[ -n "$signingkey" ]]; then
         git config --global gpg.program "gpg"
         git config --global user.signingkey "$signingkey"
+        git config --global commit.gpgsign true
     else
         echo "⚠ 未找到 GPG 密钥,跳过签名配置"
         echo "✓ Git configured"
