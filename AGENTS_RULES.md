@@ -45,7 +45,7 @@ gpu: amd redeon rx 6750 GRE 12GB
 - 每次修改文件之后的动作:
   - cargo fmt
   - cargo test --xxx
-  - 更新git
+  - 更新git,(must check ../.git ,if it exist, cd to it,and then git ,ban submodel)
 - 改动之前必须询问我你理解的意思是否准确
 
 ---
@@ -53,8 +53,10 @@ gpu: amd redeon rx 6750 GRE 12GB
 # README.md 文件格式
 
 ```markdown
-## log.rs
-
+## file://src/log.rs
+explain
+```
+# log.md 
 | 入参 | 参数 | 类型 | 说明 |
 | ---- | ---- | ---- | ---- |
 |      | ...  |      |      |
