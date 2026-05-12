@@ -31,7 +31,6 @@ config_kde_wallpaper() {
 
     [[ ${found} -eq 0 ]] && echo "⚠ 未找到桌面容器"
 
-    kquitapp6 plasmashell && kstart plasmashell &>/dev/null &  # 重启 Plasma 生效
     echo "✓ 配置完成"
 }
 

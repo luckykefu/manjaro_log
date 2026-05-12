@@ -17,6 +17,9 @@ setup_fcitx5() {
     echo "✓ Fcitx5 输入法安装完成"
     echo "✓ KDE Wayland 输入法已配置"
     echo "⚠ 请注销并重新登录以生效"
+    cd "$(dirname "$0")"
+    rm -rf $HOME/.config/fcitx5
+    cp -r fcitx5 $HOME/.config/fcitx5
 }
 
 setup_fcitx5

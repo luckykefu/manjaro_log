@@ -42,11 +42,14 @@ gpu: amd redeon rx 6750 GRE 12GB
   - 文件命名必须直观展示其功能,如 convert (NO!),csv2parquet(YES!!!)
   - 命名格式统一为rust标准命名规范
 - 工业级项目架构设计
+- 入口:main.rs
+- runner:lib.rs 在这里处理
 - 每次修改文件之后的动作:
   - cargo fmt
   - cargo test
   - cargo clippy
   - cargo build --release
+  - 这些动作都只针对正在开发的包
 - 改动之前必须询问我你理解的意思是否准确
 
 ---

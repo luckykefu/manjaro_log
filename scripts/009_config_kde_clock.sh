@@ -41,7 +41,6 @@ config_kde_clock() {
 
     [[ ${found} -eq 0 ]] && echo "⚠ 未找到 digitalclock 插件"
 
-    kquitapp6 plasmashell && kstart plasmashell &>/dev/null &  # 重启 Plasma 生效
     echo "✓ 配置完成"
 }
 
