@@ -26,6 +26,7 @@ sudo pacman -S --needed --noconfirm base-devel yay keepassxc rust zed
 # ── AUR 包 ──
 info "安装 AUR 包 (通过代理)..."
 ALL_PROXY=socks5://127.0.0.1:1080 yay -S --needed --noconfirm clash-verge-rev-bin cryptomator-bin
+echo "clash-verge subscribe link: https://api3.nimenshishangdi.cc/dazhutou/eebe36f8c2eb695b9841a61eb4b03825"
 scripts/source_shrc.sh
 scripts/setup_fcitx5.sh
 systemsettings kcm_kscreen
