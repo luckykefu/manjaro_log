@@ -53,7 +53,7 @@ install_theme() {
         bash install.sh && echo "✓ Installed ${theme_name}"
     fi
 
-    rm -rf "${theme_path}" && echo "✓ Cleaned ${theme_name}"  # 安装后清理源码
+    rm -rf "${theme_path}"
 }
 
 main() {
@@ -74,4 +74,4 @@ https://github.com/vinceliuice/WhiteSur-cursors.git"
     echo "✓ All themes processed"
 }
 
-main
+[[ "${BASH_SOURCE[0]}" == "$0" ]] && main

@@ -1,6 +1,7 @@
 #!/bin/bash
 set -euo pipefail
-cd "$(dirname "$0"/..)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR/.."
 
 info()  { echo -e "\e[1;34m[*]\e[0m $*"; }
 ok()    { echo -e "\e[1;32m[✓]\e[0m $*"; }
@@ -12,17 +13,17 @@ lookandfeeltool -a org.manjaro.breath-dark.desktop
 
 # ── Git / SSH ──
 info "配置 Git..."
-scripts/gitConfig.sh
+scripts/git_config.sh
 
 info "配置 SSH..."
-scripts/sshConfig.sh
+scripts/ssh_config.sh
 
 info "cfg gpg_gen"
 scripts/gpg_gen.sh "kefu" "19157521820@163.com" "lkf.Gpg.mima3"
 
 # ── SS 代理 ──
 info "启动 SS 代理..."
-scripts/ssProxyConfig.sh 202.182.112.91
+scripts/ss_proxy_config.sh 202.182.112.91
 
 # ── 系统包 ──
 info "安装系统依赖..."

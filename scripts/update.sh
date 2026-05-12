@@ -1,4 +1,9 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
-sudo pacman -Syyu --noconfirm  # 更新官方源软件包
-yay -Syyu --noconfirm          # 更新 AUR 软件包
+
+update() {
+    sudo pacman -Syyu --noconfirm
+    yay -Syyu --noconfirm
+}
+
+[[ "${BASH_SOURCE[0]}" == "$0" ]] && update

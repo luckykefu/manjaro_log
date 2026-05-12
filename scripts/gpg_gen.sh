@@ -1,21 +1,35 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # 从批处理文件生成 GPG 密钥
-# 用法: gpg_gen.sh [name] [email] [passphrase]
+# 用法: GPG_PASSPHRASE=<pass> gpg_gen.sh [name] [email]
+# 或: gpg_gen.sh [name] [email] (交互式输入)
 
 set -euo pipefail
 
-NAME="${1:-}"
-EMAIL="${2:-}"
-PASS="${3:-}"
+gpg_gen() {
+    local NAME="${1:-}"
+    local EMAIL="${2:-}"
 
-[ -z "$NAME" ] && read -rp "Name: " NAME
-[ -z "$EMAIL" ] && read -rp "Email: " EMAIL
-[ -z "$PASS" ]  && read -rsp "Passphrase: " PASS && echo
+    [[ -z "$NAME" ]] && read -rp "Name: " NAME
+    [[ -z "$EMAIL" ]] && read -rp "Email: " EMAIL
 
-CFG=$(mktemp /tmp/gpg_batch.XXXXXX)
-trap 'rm -f "$CFG"' EXIT
+    if gpg --list-keys "$EMAIL" &>/dev/null; then
+        echo "✓ GPG 密钥已存在 ($EMAIL)，跳过"
+        return
+    fi
 
-cat > "$CFG" <<EOF
+    local PASS
+    if [[ -n "${GPG_PASSPHRASE:-}" ]]; then
+        PASS="${GPG_PASSPHRASE}"
+        echo "✓ 使用环境变量 GPG_PASSPHRASE"
+    else
+        read -rsp "Passphrase: " PASS && echo
+    fi
+
+    local CFG
+    CFG=$(mktemp /tmp/gpg_batch.XXXXXX)
+    trap 'rm -f "$CFG"' EXIT
+
+    cat > "$CFG" <<EOF
 %echo Generating GPG key
 Key-Type: RSA
 Key-Length: 4096
@@ -29,4 +43,7 @@ Passphrase: ${PASS}
 %echo Done
 EOF
 
-gpg --batch --generate-key "$CFG"
+    gpg --batch --generate-key "$CFG"
+}
+
+[[ "${BASH_SOURCE[0]}" == "$0" ]] && gpg_gen "$@"

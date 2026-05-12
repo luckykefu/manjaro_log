@@ -50,4 +50,4 @@ EOF
     echo -e "\n🔑 密码: $PASSWORD"
 }
 
-setup_ss_server "$@"
+[[ "${BASH_SOURCE[0]}" == "$0" ]] && setup_ss_server "$@"

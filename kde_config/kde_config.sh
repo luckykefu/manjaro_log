@@ -1,6 +1,7 @@
 #!/bin/bash
 set -euo pipefail
-cd "$(dirname "$0")/.."  # 确保在脚本目录下执行
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR/.."  # 确保在脚本目录下执行
 ALL_PROXY=socks5://127.0.0.1:1080 scripts/install_mac_themes.sh
 kcmshell6 kcm_lookandfeel
 scripts/009_config_kde_clock.sh

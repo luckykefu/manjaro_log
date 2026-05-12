@@ -44,4 +44,4 @@ config_kde_clock() {
     echo "✓ 配置完成"
 }
 
-config_kde_clock
+[[ "${BASH_SOURCE[0]}" == "$0" ]] && config_kde_clock

@@ -50,4 +50,4 @@ ss_local() {
     echo "$code"
 }
 
-ss_local "$@"
+[[ "${BASH_SOURCE[0]}" == "$0" ]] && ss_local "$@"

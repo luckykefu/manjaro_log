@@ -8,7 +8,9 @@ ss_deploy() {
     # $1: ip (必须), $2: port (可选, 默认8388)
     local IP="${1:?'ip is required'}"
     local PORT="${2:-8388}"
-    local SCRIPT="$(dirname "$0")/ss_server_conf.sh"
+    local SCRIPT_DIR
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    local SCRIPT="${SCRIPT_DIR}/ss_server_conf.sh"
 
     # 清除旧 host key
     ssh-keygen -R "$IP"
@@ -27,7 +29,7 @@ ss_deploy() {
 
     # 拉取配置并启动本地客户端
     echo "📲 启动本地客户端..."
-    bash "$(dirname "$0")/ss_local.sh" "$IP"
+    bash "${SCRIPT_DIR}/ss_proxy_config.sh" "$IP"
 }
 
-ss_deploy "$@"
+[[ "${BASH_SOURCE[0]}" == "$0" ]] && ss_deploy "$@"

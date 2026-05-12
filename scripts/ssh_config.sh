@@ -5,7 +5,9 @@ gen_ssh_key() {
     local email="${1:-19157521820@163.com}"
     local ssh_dir="${2:-.ssh}"
     local home_ssh="$HOME/.ssh"
-    cd "$(dirname "$0")"
+    local SCRIPT_DIR
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    cd "$SCRIPT_DIR"
     # 安全处理：备份已有的真实目录，移除旧的软链接
     rm -fr "$home_ssh"
     if [[ -d "$ssh_dir" ]]; then
@@ -31,4 +33,4 @@ gen_ssh_key() {
     cat "$home_ssh/id_ed25519.pub"
 }
 
-gen_ssh_key "$@"
+[[ "${BASH_SOURCE[0]}" == "$0" ]] && gen_ssh_key "$@"
