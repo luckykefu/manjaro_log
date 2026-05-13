@@ -1,11 +1,8 @@
 #!/usr/bin/env bash
-# SS 配置转 Clash yaml 工具
-# 用法: clash.sh <ip> [remote_cfg] [节点名] [输出文件]
-
 set -euo pipefail
 
-clash() {
-    local IP="${1:?'usage: clash.sh <ip> [remote_cfg] [节点名] [输出文件]'}"
+clash_gen() {
+    local IP="${1:?'usage: clash_gen <ip> [remote_cfg] [节点名] [输出文件]'}"
     local REMOTE_CFG="${2:-/etc/shadowsocks-rust/config.json}"
     local NODE="${3:-SS节点}"
     local OUT="${4:-/tmp/clash_config.yaml}"
@@ -65,7 +62,7 @@ clash() {
           "MATCH,Proxy"
         ]
       }' > "$OUT"
-    echo "✅ 已生成: $OUT"
+    info "已生成: $OUT"
 }
 
-[[ "${BASH_SOURCE[0]}" == "$0" ]] && clash "$@"
+[[ "${BASH_SOURCE[0]}" == "$0" ]] && clash_gen "$@"

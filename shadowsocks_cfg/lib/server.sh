@@ -5,7 +5,6 @@
 set -euo pipefail
 
 setup_ss_server() {
-    # $1: password (可选, 默认自动生成), $2: port (可选, 默认8388)
     local PASSWORD="${1:-$(openssl rand -base64 32)}"
     local PORT="${2:-8388}"
     local NAME=config

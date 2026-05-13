@@ -5,31 +5,25 @@
 set -euo pipefail
 
 ss_deploy() {
-    # $1: ip (必须), $2: port (可选, 默认8388)
     local IP="${1:?'ip is required'}"
     local PORT="${2:-8388}"
     local SCRIPT_DIR
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    local SCRIPT="${SCRIPT_DIR}/ss_server_conf.sh"
+    local SCRIPT="${SCRIPT_DIR}/server.sh"
 
-    # 清除旧 host key
     ssh-keygen -R "$IP"
 
-    # 配置免密登录
     echo "🔑 配置免密登录..."
     ssh-copy-id -i ~/.ssh/id_ed25519.pub "root@$IP"
 
-    # 上传配置脚本
     echo "📤 上传配置脚本..."
-    scp "$SCRIPT" "root@$IP:~/ss_server_conf.sh"
+    scp "$SCRIPT" "root@$IP:~/server.sh"
 
-    # 远程执行，密码自动生成
     echo "🚀 远程执行配置..."
-    ssh "root@$IP" "bash ss_server_conf.sh '' '$PORT'"
+    ssh "root@$IP" "bash server.sh '' '$PORT'"
 
-    # 拉取配置并启动本地客户端
     echo "📲 启动本地客户端..."
-    bash "${SCRIPT_DIR}/ss_proxy_config.sh" "$IP"
+    bash "${SCRIPT_DIR}/proxy_config.sh" "$IP"
 }
 
 [[ "${BASH_SOURCE[0]}" == "$0" ]] && ss_deploy "$@"

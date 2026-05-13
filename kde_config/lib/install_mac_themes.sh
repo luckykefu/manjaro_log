@@ -2,8 +2,6 @@
 set -euo pipefail
 
 is_theme_installed() {
-    # 检查主题是否已安装，避免重复安装
-    # $1: theme_name
     local theme_name="$1"
     case "${theme_name}" in
         WhiteSur-icon-theme)
@@ -22,8 +20,6 @@ is_theme_installed() {
 }
 
 install_theme() {
-    # clone 主题仓库，执行 install.sh，安装完清理源码
-    # $1: git_url, $2: themes_dir (可选)
     local git_url="$1"
     local themes_dir="${2:-${HOME}/Downloads/.themes}"
     local theme_name
@@ -46,7 +42,7 @@ install_theme() {
     cd "${theme_path}" || return 1
 
     if [[ "${theme_name}" == "WhiteSur-cursors" && -f "build.sh" ]]; then
-        bash build.sh &>/dev/null && echo "✓ Built cursors"  # 光标主题需先编译
+        bash build.sh &>/dev/null && echo "✓ Built cursors"
     fi
 
     if [[ -f "install.sh" ]]; then
@@ -56,8 +52,8 @@ install_theme() {
     rm -rf "${theme_path}"
 }
 
-main() {
-    command -v git >/dev/null 2>&1 || { echo "✗ git not found" >&2; exit 1; }  # 依赖检查
+install_mac_themes() {
+    command -v git >/dev/null 2>&1 || { echo "✗ git not found" >&2; exit 1; }
 
     local urls="https://github.com/vinceliuice/WhiteSur-icon-theme.git
 https://github.com/vinceliuice/WhiteSur-kde.git
@@ -74,4 +70,4 @@ https://github.com/vinceliuice/WhiteSur-cursors.git"
     echo "✓ All themes processed"
 }
 
-[[ "${BASH_SOURCE[0]}" == "$0" ]] && main
+[[ "${BASH_SOURCE[0]}" == "$0" ]] && install_mac_themes
