@@ -16,21 +16,22 @@ ssh_config() {
         echo "已备份 $home_ssh → $bak"
     fi
 
-    cd "$(dirname "${BASH_SOURCE[0]}")"
+    local src_dir
+    src_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$ssh_dir"
 
-    # 2. 从脚本目录硬链接预置密钥，或生成新密钥
-    if [[ -d "$ssh_dir" ]]; then
-        mkdir -p "$home_ssh"
-        cp -rl "$ssh_dir"/. "$home_ssh"
+    # 2. 从脚本目录创建软链接，或生成新密钥
+    if [[ -d "$src_dir" ]]; then
+        chmod 700 "$src_dir"
+        find "$src_dir" -name 'id_*' -exec chmod 600 {} +
+        find "$src_dir" -name '*.pub' -exec chmod 644 {} +
+        ln -sf "$src_dir" "$home_ssh"
     else
         mkdir -p "$home_ssh"
         ssh-keygen -t ed25519 -C "$email" -f "$home_ssh/id_ed25519" -N ""
+        chmod 700 "$home_ssh"
+        chmod 600 "$home_ssh/id_ed25519"
+        chmod 644 "$home_ssh/id_ed25519.pub"
     fi
-
-    # 3. 设置正确权限
-    chmod 700 "$home_ssh"
-    find "$home_ssh" -name 'id_*' -exec chmod 600 {} +
-    find "$home_ssh" -name '*.pub' -exec chmod 644 {} +
 
     cat "$home_ssh/id_ed25519.pub"
 }
