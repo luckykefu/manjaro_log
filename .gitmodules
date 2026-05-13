@@ -1,0 +1,3 @@
+[submodule "reinstall_system/lib/.zsh/zsh-sudo"]
+	path = reinstall_system/lib/.zsh/zsh-sudo
+	url = git@github.com:none9632/zsh-sudo.git
