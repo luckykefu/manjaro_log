@@ -1,6 +1,6 @@
-auto_push() {
-    local msg="${1:?usage: auto_push <commit message>}"
-    git add .
-    git commit -m "${msg}"
-    git push
+git_push() {
+    local func="${funcstack[1]}"
+    [[ -z "${1:-}" ]] && { echo "usage: ${func} <commit message>" >&2; return 1; }
+    local msg="$1"
+    git add . && git commit -m "${msg}" && git push
 }

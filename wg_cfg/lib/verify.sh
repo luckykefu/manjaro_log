@@ -1,14 +1,9 @@
 #!/usr/bin/env bash
-set -euo pipefail
 
 verify_connectivity() {
-    header "验证"
+    ensure_cmd ping
     sleep 2
-    if ping -c 2 -W 3 10.0.0.1 &>/dev/null; then
-        info "本地 -> 服务器: 连通 ✓"
-    else
-        warn "本地 -> 服务器: 未连通，请检查防火墙 (需开放 $WG_PORT/udp)"
-    fi
+    ping -c 2 -W 3 10.0.0.1 &>/dev/null
 }
 
 print_guide() {

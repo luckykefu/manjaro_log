@@ -1,49 +1,40 @@
 #!/usr/bin/env bash
-# 从批处理文件生成 GPG 密钥
-# 用法: GPG_PASSPHRASE=<pass> gpg_gen.sh [name] [email]
-# 或: gpg_gen.sh [name] [email] (交互式输入)
-
-set -euo pipefail
+# gpg_gen.sh — 生成 GPG 密钥
+# 用法: GPG_PASSPHRASE=<pass> gpg_gen.sh <name> <email>
 
 gpg_gen() {
-    local NAME="${1:-}"
-    local EMAIL="${2:-}"
+    local email="${2:?"usage: gpg_gen <name> <email>"}"
 
-    [[ -z "$NAME" ]] && read -rp "Name: " NAME
-    [[ -z "$EMAIL" ]] && read -rp "Email: " EMAIL
-
-    if gpg --list-keys "$EMAIL" &>/dev/null; then
-        echo "✓ GPG 密钥已存在 ($EMAIL)，跳过"
-        return
+    # 1. 检查是否已有该邮箱的密钥
+    if gpg --list-keys "$email" &>/dev/null; then
+        echo "GPG key for $email already exists, skipping"
+        return 0
     fi
 
-    local PASS
-    if [[ -n "${GPG_PASSPHRASE:-}" ]]; then
-        PASS="${GPG_PASSPHRASE}"
-        echo "✓ 使用环境变量 GPG_PASSPHRASE"
-    else
-        read -rsp "Passphrase: " PASS && echo
-    fi
+    # 2. 创建临时 batch 配置
+    local cfg
+    cfg=$(mktemp /tmp/gpg_batch.XXXXXX) || { echo "mktemp failed"; return 1; }
+    trap "rm -f '$cfg'" RETURN
 
-    local CFG
-    CFG=$(mktemp /tmp/gpg_batch.XXXXXX)
-    trap 'rm -f "$CFG"' EXIT
-
-    cat > "$CFG" <<EOF
-%echo Generating GPG key
-Key-Type: RSA
-Key-Length: 4096
-Subkey-Type: RSA
-Subkey-Length: 4096
-Name-Real: ${NAME}
-Name-Email: ${EMAIL}
+    cat > "$cfg" <<EOF
+Key-Type: eddsa
+Key-Curve: ed25519
+Subkey-Type: ecdh
+Subkey-Curve: cv25519
+Name-Real: ${1}
+Name-Email: ${2}
 Expire-Date: 0
-Passphrase: ${PASS}
+Passphrase: ${GPG_PASSPHRASE}
 %commit
-%echo Done
 EOF
 
-    gpg --batch --generate-key "$CFG"
+    # 3. 生成密钥
+    gpg --batch --generate-key "$cfg" || {
+        echo "error: GPG key generation failed"; return 1;
+    }
+    echo "GPG key generated for $email"
 }
 
-[[ "${BASH_SOURCE[0]}" == "$0" ]] && gpg_gen "$@"
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    gpg_gen "$@"
+fi

@@ -2,6 +2,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/lib/common.sh"
 LIB_DIR="$SCRIPT_DIR/lib"
 
 for lib in "$LIB_DIR"/*.sh; do
@@ -9,7 +10,7 @@ for lib in "$LIB_DIR"/*.sh; do
 done
 
 main() {
-    apply_theme
+    info "应用主题..." && lookandfeeltool -a org.manjaro.breath-dark.desktop
 
     cfg_git
     gen_ssh_key

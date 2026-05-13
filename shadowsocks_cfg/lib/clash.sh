@@ -1,11 +1,17 @@
 #!/usr/bin/env bash
-set -euo pipefail
+# clash.sh — 从远程 ss 服务端配置生成 Clash 客户端 YAML
+# 用法: clash_gen <ip> [remote_cfg] [节点名] [输出文件]
+# 默认: remote_cfg=/etc/shadowsocks-rust/config.json, 节点名=SS节点, 输出=/tmp/clash_config.yaml
 
 clash_gen() {
     local IP="${1:?'usage: clash_gen <ip> [remote_cfg] [节点名] [输出文件]'}"
     local REMOTE_CFG="${2:-/etc/shadowsocks-rust/config.json}"
     local NODE="${3:-SS节点}"
     local OUT="${4:-/tmp/clash_config.yaml}"
+
+    ensure_cmd scp openssh
+    ensure_cmd jq
+    ensure_cmd yq
 
     local tmp
     tmp=$(mktemp /tmp/ss_config.XXXXXX.json)
@@ -62,7 +68,6 @@ clash_gen() {
           "MATCH,Proxy"
         ]
       }' > "$OUT"
-    info "已生成: $OUT"
 }
 
 [[ "${BASH_SOURCE[0]}" == "$0" ]] && clash_gen "$@"

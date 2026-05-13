@@ -1,23 +1,27 @@
 #!/usr/bin/env bash
-set -euo pipefail
+# auto_start.sh — 配置开机自启应用
+# 用法: auto_start [app1 app2 ...]
 
 auto_start() {
-    local AUTOSTART_DIR="${HOME}/.config/autostart"
-    local APPLICATIONS_DIR="/usr/share/applications"
-    local bins=(cryptomator clash-verge keepassxc)
+    local -a bins=()
+    if [[ $# -eq 0 ]]; then
+        bins=(cryptomator clash-verge keepassxc)
+    else
+        bins=("$@")
+    fi
 
-    mkdir -p "${AUTOSTART_DIR}"
+    mkdir -p "${HOME}/.config/autostart"
+
+    # 1. 为每个应用创建 .desktop 自启条目
     for bin in "${bins[@]}"; do
-        local path
-        path=$(which "${bin}" 2>/dev/null) || { echo "[-] ${bin}: not found, skip"; continue; }
-        echo "[+] ${bin}: found at ${path}"
-        local desktop_file="${APPLICATIONS_DIR}/${bin}.desktop"
-        local target="${AUTOSTART_DIR}/${bin}.desktop"
-        if [[ -f "${desktop_file}" ]]; then
-            cp "${desktop_file}" "${target}"
-            echo "    -> copied from ${desktop_file}"
+        local path target
+        path=$(command -v "$bin") || { echo "skip: $bin not found"; continue; }
+        target="${HOME}/.config/autostart/${bin}.desktop"
+
+        if [[ -f "/usr/share/applications/${bin}.desktop" ]]; then
+            cp "/usr/share/applications/${bin}.desktop" "$target"
         else
-            cat > "${target}" <<EOF
+            cat > "$target" << EOF
 [Desktop Entry]
 Type=Application
 Name=${bin}
@@ -25,11 +29,12 @@ Exec=${path}
 Terminal=false
 X-GNOME-Autostart-enabled=true
 EOF
-            echo "    -> created minimal desktop entry"
         fi
-        chmod 644 "${target}"
+        chmod 644 "$target"
+        echo "autostart enabled: $bin"
     done
-    echo "[✓] done"
 }
 
-[[ "${BASH_SOURCE[0]}" == "$0" ]] && auto_start
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    auto_start "$@"
+fi

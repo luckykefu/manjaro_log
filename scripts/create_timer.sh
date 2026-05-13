@@ -1,23 +1,29 @@
-#!/bin/bash
-setup_git_backup() {
-  local FILE=${1:?Usage: $0 <sh_file_path>}
-  local NAME=$(basename "$FILE" .sh)
-  mkdir -p $(dirname $FILE)
-  chmod +x $FILE
+#!/usr/bin/env bash
 
-  local ServiceFile=~/.config/systemd/user/$NAME.service
-  mkdir -p $(dirname $ServiceFile)
-  cat > $ServiceFile << EOF
+COMMON_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../lib"
+source "${COMMON_DIR}/common.sh"
+# 为指定脚本创建 systemd 用户定时器（每日 00:00 执行）
+
+setup_git_backup() {
+    ensure_cmd systemctl
+  local file="${1:?Usage: $0 <sh_file_path>}"
+  local name
+  name="$(basename "$file" .sh)"
+  local user_dir="$HOME/.config/systemd/user"
+
+  mkdir -p "$(dirname "$file")" "$user_dir"
+  chmod +x "$file"
+
+  cat > "${user_dir}/${name}.service" << EOF
 [Unit]
 Description=Git Auto Push
 After=network.target
 
 [Service]
-ExecStart=$FILE
+ExecStart=${file}
 EOF
 
-  local TimerFile=~/.config/systemd/user/$NAME.timer
-  cat > $TimerFile << 'EOF'
+  cat > "${user_dir}/${name}.timer" << 'EOF'
 [Unit]
 Description=Git Auto Push Daily
 
@@ -30,11 +36,7 @@ WantedBy=timers.target
 EOF
 
   systemctl --user daemon-reload
-  systemctl --user enable --now $(basename $TimerFile)
-  systemctl --user status $(basename $TimerFile)
-  systemctl --user start $(basename $ServiceFile)
-  journalctl --user -u $(basename $ServiceFile) -n 50 --no-pager
-  systemctl --user list-timers --all
+  systemctl --user enable --now "${name}.timer"
 }
 
 [[ "${BASH_SOURCE[0]}" == "$0" ]] && setup_git_backup "$1"

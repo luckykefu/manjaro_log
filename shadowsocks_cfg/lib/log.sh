@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -euo pipefail
 
 info()  { echo -e "\e[1;34m[*]\e[0m $*"; }
 ok()    { echo -e "\e[1;32m[✓]\e[0m $*"; }

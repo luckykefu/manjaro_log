@@ -1,36 +1,40 @@
 #!/usr/bin/env bash
-set -euo pipefail
+# ssh_config.sh — 生成/复制 SSH 密钥
+# 用法: ssh_config [email] [ssh_dir]
+# 默认: email=19157521820@163.com, ssh_dir=.ssh (相对于脚本目录)
 
-gen_ssh_key() {
+ssh_config() {
     local email="${1:-19157521820@163.com}"
     local ssh_dir="${2:-.ssh}"
     local home_ssh="$HOME/.ssh"
-    local SCRIPT_DIR
-    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    cd "$SCRIPT_DIR"
-    # 安全处理：备份已有的真实目录，移除旧的软链接
-    rm -fr "$home_ssh"
-    if [[ -d "$ssh_dir" ]]; then
-        # 目录已存在：复制到 ~/.ssh
-        cp -r "$ssh_dir" "$home_ssh"
-        echo "✓ SSH 目录已复制到 ~/.ssh"
-    else
-        # 目录不存在：直接在 ~/.ssh 创建并生成密钥
-        mkdir -p "$home_ssh"
 
-        ssh-keygen -t ed25519 -C "$email" -f "$home_ssh/id_ed25519" -N ""
-        echo "✓ SSH 密钥已生成: $home_ssh/id_ed25519"
+    # 1. 备份现有 ~/.ssh
+    if [[ -d "$home_ssh" ]]; then
+        local bak="$HOME/.ssh.bak"
+        [[ -d "$bak" ]] && rm -rf "$bak"
+        mv "$home_ssh" "$bak"
+        echo "已备份 $home_ssh → $bak"
     fi
 
-    # 统一设置权限
-    chmod 700 "$home_ssh"
-    shopt -s nullglob
-    chmod 600 "$home_ssh"/id_*
-    chmod 644 "$home_ssh"/*.pub
-    shopt -u nullglob
+    cd "$(dirname "${BASH_SOURCE[0]}")"
 
-    echo "公钥内容:"
+    # 2. 从脚本目录硬链接预置密钥，或生成新密钥
+    if [[ -d "$ssh_dir" ]]; then
+        mkdir -p "$home_ssh"
+        cp -rl "$ssh_dir"/. "$home_ssh"
+    else
+        mkdir -p "$home_ssh"
+        ssh-keygen -t ed25519 -C "$email" -f "$home_ssh/id_ed25519" -N ""
+    fi
+
+    # 3. 设置正确权限
+    chmod 700 "$home_ssh"
+    find "$home_ssh" -name 'id_*' -exec chmod 600 {} +
+    find "$home_ssh" -name '*.pub' -exec chmod 644 {} +
+
     cat "$home_ssh/id_ed25519.pub"
 }
 
-[[ "${BASH_SOURCE[0]}" == "$0" ]] && gen_ssh_key "$@"
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    ssh_config "$@"
+fi

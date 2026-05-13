@@ -1,20 +1,20 @@
 #!/usr/bin/env bash
-set -euo pipefail
+
+COMMON_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../lib"
+source "${COMMON_DIR}/common.sh"
 
 auto_push() {
-    local SCRIPT_DIR
-    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    local DIRS=(
-        "$SCRIPT_DIR/.."
-        "$SCRIPT_DIR/../../.cryptomator"
-    )
-    for DIR in "${DIRS[@]}"; do
-        if [[ -d "$DIR/.git" ]]; then
-            echo "=== 正在处理: $DIR ==="
-            cd "$DIR" && git add -A && git diff --cached --quiet || git commit -m "$(date '+%Y-%m-%d')" && git push
-        else
-            echo "=== 跳过: $DIR (不是 git 仓库或未挂载) ==="
-        fi
+    ensure_cmd git
+    local script_dir
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    local dirs=("$script_dir/.." "$script_dir/../../.cryptomator")
+
+    for dir in "${dirs[@]}"; do
+        [[ -d "$dir/.git" ]] || continue
+        cd "$dir"
+        git add -A
+        git diff --cached --quiet || git commit -m "$(date '+%Y-%m-%d')"
+        git push
     done
 }
 

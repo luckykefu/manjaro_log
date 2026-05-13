@@ -1,31 +1,32 @@
 #!/usr/bin/env bash
 # 配置免密码 sudo
 # 用法: sudo_nopassword.sh [user]
-# 注意: 需要通过 sudo 执行
-
-set -euo pipefail
 
 sudo_nopassword() {
-    local target_user="${1:-${SUDO_USER:-$(whoami)}}"
-    local sudoer_file="/etc/sudoers.d/${target_user}"
+    command -v sudo &>/dev/null || return 1
 
-    if [[ -f "$sudoer_file" ]]; then
-        local current_perms current_owner
-        current_perms=$(stat -c "%a" "$sudoer_file" 2>/dev/null || echo "000")
-        current_owner=$(stat -c "%U:%G" "$sudoer_file" 2>/dev/null || echo "unknown")
-        if [[ "$current_perms" != "440" ]]; then
-            echo "⚠ 文件权限异常: $current_perms (应为 440)"
-            echo "⚠ 当前所有者: $current_owner"
-        fi
-    fi
+    local user="${1:-${SUDO_USER:-$(whoami)}}"
 
-    echo "$target_user ALL=(ALL) NOPASSWD: ALL" | sudo tee "$sudoer_file" > /dev/null
-    sudo chmod 440 "$sudoer_file"
-    sudo chown root:root "$sudoer_file"
+    [[ -z "$user" ]] && { echo "error: empty username"; return 1; }
 
-    echo "✓ Passwordless sudo configured for user: $target_user"
-    echo "  File: $sudoer_file"
-    echo "  Permissions: $(stat -c "%a" "$sudoer_file")"
+    id "$user" &>/dev/null || { echo "error: user $user does not exist"; return 1; }
+
+    [[ "$user" =~ ^[a-zA-Z0-9_][a-zA-Z0-9_.-]*$ ]] || { echo "error: invalid username $user"; return 1; }
+
+    local sudoers_dir="/etc/sudoers.d"
+    local sudoers_file="$sudoers_dir/$user"
+
+    echo "$user ALL=(ALL) NOPASSWD: ALL" | sudo tee "$sudoers_file" > /dev/null || {
+        echo "error: failed to write $sudoers_file"; return 1;
+    }
+
+    sudo chmod 0440 "$sudoers_file" || {
+        echo "error: failed to set permissions on $sudoers_file"; return 1;
+    }
+
+    echo "已为用户 $user 配置免密码 sudo"
 }
 
-[[ "${BASH_SOURCE[0]}" == "$0" ]] && sudo_nopassword "$@"
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    sudo_nopassword "$@"
+fi
