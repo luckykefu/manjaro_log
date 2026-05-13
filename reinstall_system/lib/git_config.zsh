@@ -1,5 +1,9 @@
-#!/usr/bin/env bash
-# git_config.sh — 配置 git 全局用户名、邮箱、默认分支、GPG 签名
+# git_config.zsh — 配置 git 全局用户名、邮箱、默认分支、GPG 签名
+# DOC:
+#   1. 设置 user.name / user.email
+#   2. 设置默认分支为 main
+#   3. 配置 credential helper（优先 libsecret，fallback cache）
+#   4. 从 GPG 获取 signingkey → 启用 commit.gpgsign
 # 用法: git_config [name] [email]
 # 默认: name=kefu, email=19157521820@163.com
 
@@ -13,9 +17,10 @@ git_config() {
 
     # 2. 设置默认分支为 main
     git config --global init.defaultBranch "main"
-    # 3. 设置 credential helper
+
+    # 3. 配置 credential helper（优先 libsecret）
     if git config --global credential.helper "libsecret" 2>/dev/null; then
-        :  # libsecret 可用
+        :
     else
         echo "libsecret 不可用，使用 cache 作为 credential helper"
         git config --global credential.helper "cache --timeout=3600"
@@ -34,6 +39,3 @@ git_config() {
     fi
 }
 
-if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
-    git_config "$@"
-fi
