@@ -1,27 +1,25 @@
 //! Git 全局配置
 //!
-//! 配置 Git 全局 user.name 和 user.email。
-//! 若当前值已匹配则跳过，避免重复写入。
-//!
+//! 配置用户名、邮箱、默认分支、credential helper 及 GPG 提交签名。
 //! ============================
 //! 入参说明
 //! | 入参 | 参数 | 类型 | 说明 |
 //! | ---- | ---- | ---- | ---- |
 //! | GitConfig.name | | String | 用户名 |
 //! | GitConfig.email | | String | 邮箱 |
-//! | run | name, email | Option<String> | 使用参数或默认值配置 Git |
+//! | run | name, email | Option<String> | 使用参数或默认值 |
 //! | 返回 | | Result<()> | Ok(()) |
 //! =============================
 //! ASCII图示处理逻辑:
 //!
 //! 1 run(name, email) ->
-//! 2    |- 解析 name: arg ?? default ?? 当前 git config
-//! 3    |- 解析 email: arg ?? default ?? 当前 git config
-//! 4    |- 跳过已匹配的值, 写入变更的值
-//! 5    +- git config --global user.name/email
-//! 返回 -> ()
+//! 2    |- 解析 name/email，写入 git config
+//! 3    |- git config --global init.defaultBranch main
+//! 4    |- git config --global credential.helper
+//! 5    +- 查找 GPG 密钥，启用 commit 签名
 
-use crate::{run_cmd, sdebug, sinfo};
+use crate::run_cmd::{self, RunConfig};
+use crate::{sdebug, sinfo, swarn};
 
 pub const GIT_NAME: &str = "kefu";
 pub const GIT_EMAIL: &str = "19157521820@163.com";
@@ -40,49 +38,106 @@ impl GitConfig {
     }
 }
 
-pub fn run(name: Option<String>, email: Option<String>) -> anyhow::Result<()> {
-    sdebug!("git name={:?} email={:?}", name, email);
+fn git_config(key: &str, value: &str) -> anyhow::Result<()> {
+    run_cmd::execute_and_wait(&RunConfig::new("git", &["config", "--global", key, value]))
+}
 
-    let resolved_name = resolve_value(name, GIT_NAME, "user.name");
-    let resolved_email = resolve_value(email, GIT_EMAIL, "user.email");
-
-    if let Some(ref n) = resolved_name {
-        run_cmd::execute_and_wait(&run_cmd::RunConfig::new(
-            "git",
-            &["config", "--global", "user.name", n],
-        ))?;
-        sinfo!("git user.name set to {}", n);
-    }
-    if let Some(ref e) = resolved_email {
-        run_cmd::execute_and_wait(&run_cmd::RunConfig::new(
-            "git",
-            &["config", "--global", "user.email", e],
-        ))?;
-        sinfo!("git user.email set to {}", e);
-    }
-
-    if resolved_name.is_none() && resolved_email.is_none() {
-        sinfo!("git config already up-to-date");
-    }
-
-    Ok(())
+fn git_config_get(key: &str) -> String {
+    run_cmd::capture_output(&RunConfig::new("git", &["config", "--global", key]))
+        .unwrap_or_default()
+        .trim()
+        .to_string()
 }
 
 fn resolve_value(arg: Option<String>, default: &str, key: &str) -> Option<String> {
     let value = arg.unwrap_or_else(|| default.to_string());
-
-    let current = run_cmd::capture_output(&run_cmd::RunConfig::new(
-        "git",
-        &["config", "--global", key],
-    ))
-    .unwrap_or_default();
-
-    if current.trim() == value {
+    if git_config_get(key) == value {
         sdebug!("git {} already set to {}, skipping", key, value);
         return None;
     }
-
     Some(value)
+}
+
+fn set_user_config(name: Option<String>, email: Option<String>) -> anyhow::Result<()> {
+    if let Some(n) = resolve_value(name, GIT_NAME, "user.name") {
+        git_config("user.name", &n)?;
+        sinfo!("git user.name set to {}", n);
+    }
+    if let Some(e) = resolve_value(email, GIT_EMAIL, "user.email") {
+        git_config("user.email", &e)?;
+        sinfo!("git user.email set to {}", e);
+    }
+    if git_config_get("user.name") == GIT_NAME && git_config_get("user.email") == GIT_EMAIL {
+        sinfo!("git user config up-to-date");
+    }
+    Ok(())
+}
+
+fn set_default_branch() -> anyhow::Result<()> {
+    if git_config_get("init.defaultBranch") == "main" {
+        sdebug!("git init.defaultBranch already main");
+        return Ok(());
+    }
+    git_config("init.defaultBranch", "main")?;
+    sinfo!("git init.defaultBranch set to main");
+    Ok(())
+}
+
+fn set_credential_helper() -> anyhow::Result<()> {
+    if git_config_get("credential.helper") == "libsecret" {
+        sdebug!("git credential.helper already libsecret");
+        return Ok(());
+    }
+    if git_config("credential.helper", "libsecret").is_err() {
+        git_config("credential.helper", "cache --timeout=3600")?;
+        swarn!("libsecret unavailable, using cache");
+    }
+    sinfo!("git credential.helper configured");
+    Ok(())
+}
+
+fn set_gpg_signing(email: &str) -> anyhow::Result<()> {
+    if git_config_get("commit.gpgsign") == "true" {
+        sdebug!("git commit.gpgsign already enabled");
+        return Ok(());
+    }
+    let out = run_cmd::capture_output(&RunConfig::new(
+        "gpg",
+        &["--list-secret-keys", "--keyid-format", "LONG", email],
+    ));
+    match out {
+        Ok(out) => {
+            if let Some(line) = out.lines().find(|l| l.trim().starts_with("sec")) {
+                if let Some(key) = line
+                    .split('/')
+                    .nth(1)
+                    .and_then(|s| s.split_whitespace().next())
+                {
+                    git_config("user.signingkey", key)?;
+                    git_config("commit.gpgsign", "true")?;
+                    sinfo!("gpg signing enabled key={key}");
+                }
+            }
+        }
+        Err(_) => {
+            swarn!("no gpg key found for {email}, skipping sign config");
+        }
+    }
+    Ok(())
+}
+
+pub fn run(name: Option<String>, email: Option<String>) -> anyhow::Result<()> {
+    sdebug!("git name={:?} email={:?}", name, email);
+    let resolved_email = resolve_value(email.clone(), GIT_EMAIL, "user.email")
+        .unwrap_or_else(|| GIT_EMAIL.to_string());
+
+    set_user_config(name, email)?;
+    set_default_branch()?;
+    set_credential_helper()?;
+    set_gpg_signing(&resolved_email)?;
+
+    sinfo!("git full configuration complete");
+    Ok(())
 }
 
 #[cfg(test)]

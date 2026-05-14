@@ -14,3 +14,9 @@
 13. fcitx5 - setup input method
 14. autostart - configure autostart
 15. update - system update
+```bash
+sudo pacman -S opencode --noconfirm
+
+ssh -NR 10880:localhost:1080 root@66.245.217.51 
+curl --socks5-hostname 127.0.0.1:10880
+```
