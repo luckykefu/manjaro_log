@@ -4,3 +4,4 @@
 # /dir/       — 仅匹配根目录
 **/.ssh/
 **/.gnupg/
+target/
