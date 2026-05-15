@@ -1,21 +1,16 @@
-#!/usr/bin/env bash
+packages() {
+    local base_pkg=(base-devel yay keepassxc rust zed opencode wezterm)
+    local fonts_pkg=(inter-font adobe-source-han-sans-otc-fonts adobe-source-han-serif-otc-fonts noto-fonts noto-fonts-cjk noto-fonts-emoji ttf-dejavu ttf-liberation wqy-microhei wqy-zenhei adobe-source-han-sans-cn-fonts adobe-source-han-serif-cn-fonts ttf-fira-code ttf-roboto)
+    local shell_tools=(ripgrep dust)
 
-## Install package groups via pacman
-## Args: $1 - config dir (default: ~/manjaro-backup), $2 - home dir (default: $HOME)
-cmd_packages() {
-    local CONFIG_DIR="${1:-$HOME/manjaro-backup}"
-    local HOME_DIR="${2:-$HOME}"
-    local pkg_list="$CONFIG_DIR/packages.txt"
-    if [[ -f "$pkg_list" ]]; then
-        local packages
-        packages="$(grep -v '^\s*#' "$pkg_list" | tr '\n' ' ')"
-        if [[ -n "$packages" ]]; then
-            sudo pacman -S --needed --noconfirm $packages
-            log_success "Packages installed from $pkg_list"
-        else
-            log_warn "No packages to install (list empty or fully commented)"
-        fi
-    else
-        log_warn "Package list not found: $pkg_list"
-    fi
+    echo "installing base packages (${#base_pkg[@]})"
+    sudo pacman -S --noconfirm --needed "${base_pkg[@]}"
+
+    echo "installing fonts (${#fonts_pkg[@]})"
+    sudo pacman -S --noconfirm --needed "${fonts_pkg[@]}"
+
+    echo "installing shell tools (${#shell_tools[@]})"
+    sudo pacman -S --noconfirm --needed "${shell_tools[@]}"
+
+    echo "all packages installed"
 }

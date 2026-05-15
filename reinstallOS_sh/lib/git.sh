@@ -1,25 +1,14 @@
-#!/usr/bin/env bash
-
-## Configure git with global settings
-## Args: $1 - config dir (default: ~/manjaro-backup), $2 - home dir (default: $HOME)
-cmd_git() {
-    local CONFIG_DIR="${1:-$HOME/manjaro-backup}"
-    local HOME_DIR="${2:-$HOME}"
-    local git_config="$CONFIG_DIR/.gitconfig"
-    if [[ -f "$git_config" ]]; then
-        cp "$git_config" "$HOME_DIR/.gitconfig"
-        log_success ".gitconfig copied from $git_config"
-    else
-        log_warn ".gitconfig not found: $git_config, applying defaults"
-        git config --global user.name "${GIT_USER_NAME:-user}"
-        git config --global user.email "${GIT_USER_EMAIL:-user@example.com}"
-    fi
-    git config --global init.defaultBranch main
-    git config --global pull.rebase true
-    git config --global rebase.autostash true
-    git config --global credential.helper store
-    git config --global ssh.command "ssh"
-    git config --global core.autocrlf input
-    git config --global core.filemode false
-    log_success "Git configured"
+git_cfg() {
+    local name="${1:-kefu}" email="${2:-19157521820@163.com}"
+    local current_name=$(git config --global user.name 2>/dev/null || echo "")
+    local current_email=$(git config --global user.email 2>/dev/null || echo "")
+    [[ "$current_name" != "$name" ]] && git config --global user.name "$name" && echo "git user.name set to $name"
+    [[ "$current_email" != "$email" ]] && git config --global user.email "$email" && echo "git user.email set to $email"
+    [[ "$(git config --global init.defaultBranch 2>/dev/null)" != "main" ]] && git config --global init.defaultBranch main
+    git config --global credential.helper &>/dev/null || { git config --global credential.helper libsecret &>/dev/null || git config --global credential.helper "cache --timeout=3600"; }
+    [[ "$(git config --global commit.gpgsign 2>/dev/null)" == "true" ]] || {
+        local key id; id=$(gpg --list-secret-keys --keyid-format LONG "$email" 2>/dev/null | grep ^sec | head -1 | sed 's/.*\///' | awk '{print $1}')
+        [[ -n "$id" ]] && { git config --global user.signingkey "$id"; git config --global commit.gpgsign true; echo "gpg signing enabled key=$id"; } || echo "warning: no gpg key found for $email" >&2
+    }
+    echo "git configured"
 }

@@ -23,7 +23,7 @@ ssh -N -R 2222:localhost:22 root@202.182.112.91
 
 ```bash
 # SSH 执行命令
-ssh -p 2222 lkf@localhost "command"
+ssh -p 2223 lkf@localhost -i ~/.ssh/id_ed25519 "command"
 
 # SCP 传文件
 scp -P 2222 file lkf@localhost:/path/

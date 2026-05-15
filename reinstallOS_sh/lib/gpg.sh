@@ -1,22 +1,27 @@
-#!/usr/bin/env bash
+gen_gpg(){
+    local name=$1 email=$2 passphrase=$3
+    gpg --list-keys "$email" &>/dev/null && echo "GPG key for $email already exists" || {
+        local batch_file="/tmp/batch-gen-key-$email"
+        cat > "$batch_file" << BATCHEOF
+Key-Type: eddsa
+Key-Curve: ed25519
+Subkey-Type: ecdh
+Subkey-Curve: cv25519
+Name-Real: $name
+Name-Email: $email
+Expire-Date: 0
+Passphrase: $passphrase
+%commit
+BATCHEOF
+        gpgconf --kill gpg-agent 2>/dev/null || true
+        gpg --batch --gen-key "$batch_file" && echo "GPG key generated for $name <$email>" || { echo "error: gpg key generation failed" >&2; rm -f "$batch_file"; return 1; }
+        rm -f "$batch_file"
+    }
+    echo "GPG done"
+}
 
-## Copy and import GPG keys from backup
-## Args: $1 - config dir (default: ~/manjaro-backup), $2 - home dir (default: $HOME)
-cmd_gpg() {
-    local CONFIG_DIR="${1:-$HOME/manjaro-backup}"
-    local HOME_DIR="${2:-$HOME}"
-    local gnupg_src="$CONFIG_DIR/.gnupg"
-    if [[ -d "$gnupg_src" ]]; then
-        cp -r "$gnupg_src" "$HOME_DIR/"
-        chmod 700 "$HOME_DIR/.gnupg"
-        find "$HOME_DIR/.gnupg" -type f -exec chmod 600 {} \;
-        log_success "GPG directory copied from $gnupg_src"
-    else
-        log_warn "GPG directory not found: $gnupg_src"
-    fi
-    local private_key="$CONFIG_DIR/private.key"
-    if [[ -f "$private_key" ]]; then
-        gpg --import "$private_key"
-        log_success "GPG private key imported from $private_key"
-    fi
+gpg_cfg() {
+    local name="${1:-kefu}" email="${2:-19157521820@163.com}" passphrase="${3:-lkf.Gpg.mima3}"
+    local SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    gen_gpg "$name" "$email" "$passphrase"
 }

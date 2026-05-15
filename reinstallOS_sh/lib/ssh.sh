@@ -1,20 +1,15 @@
-#!/usr/bin/env bash
-
-## Copy SSH keys and enable sshd service
-## Args: $1 - config dir (default: ~/manjaro-backup), $2 - home dir (default: $HOME)
-cmd_ssh() {
-    local CONFIG_DIR="${1:-$HOME/manjaro-backup}"
-    local HOME_DIR="${2:-$HOME}"
-    local ssh_src="$CONFIG_DIR/.ssh"
-    if [[ -d "$ssh_src" ]]; then
-        cp -r "$ssh_src" "$HOME_DIR/"
-        chmod 700 "$HOME_DIR/.ssh"
-        chmod 600 "$HOME_DIR/.ssh/"*
-        log_success "SSH keys copied from $ssh_src"
+ssh_keygen() {
+    local email="${1:-'kefu1820@gmail.com'}"
+    local SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    local ssh_src="$SCRIPT_DIR/.ssh"
+    local ssh_dst="$HOME/.ssh"
+    if [[ -d "$ssh_src" ]];then
+       rm -rf "$ssh_dst" && ln -sf "$ssh_src" "$ssh_dst"
     else
-        log_warn "SSH directory not found: $ssh_src"
+        mkdir -p "$ssh_src"
+        local args=(-t ed25519 -f "$ssh_src/id_ed25519" -N "")
+        [[ -n "$email" ]] && args+=(-C "$email")
+        ssh-keygen "${args[@]}" && echo "SSH key generated at $ssh_src/id_ed25519"
+        rm -rf "$ssh_dst" && ln -sf "$ssh_src" "$ssh_dst"
     fi
-    sudo systemctl enable sshd
-    sudo systemctl start sshd
-    log_success "sshd service enabled and started"
 }

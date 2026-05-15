@@ -1,9 +1,7 @@
-#!/usr/bin/env bash
-
-## Run a full system update with pacman
-## Args: none
-cmd_update() {
-    log_info "Running full system update..."
+update() {
+    echo "updating system packages"
     sudo pacman -Syyu --noconfirm
-    log_success "System updated"
+    echo "updating AUR packages"
+    yay -Syyu --noconfirm
+    echo "full update complete"
 }
