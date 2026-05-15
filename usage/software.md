@@ -1,40 +1,27 @@
-## [vscode plugins](vscode.ipynb)
+
+## [VirtualBox](VirtualBox.md)
 
 
-## [VirtualBox](VirtualBox.ipynb)
+## [Docker](docker.md)
 
 
-## [Docker](docker.ipynb)
+## [Ardour](ardour.md)
 
 
-## [Ardour](ardour.ipynb)
+## [Wine](wine.md)
 
-
-## [zsh-sudo](zsh-sudo.ipynb) 插件
-
-
-## [Wine](wine.ipynb)
-
-
-## [chrome](chrome.ipynb)
-
-
-## [clash](clash.ipynb)
-
-
-## [Davinci Resolve](Davinci_Resolve.ipynb)
+## [Davinci Resolve](Davinci_Resolve.md)
 
 https://www.blackmagicdesign.com/products/davinciresolve/
 
 
-## [ollama](ollama.ipynb)
+## [ollama](ollama.md)
 
 
-## [waydroid](waydroid.ipynb)
+## [waydroid](waydroid.md)
 
 
-## [wine](wine.ipynb)
+## [wine](wine.md)
 
 
-## [yabridge](yabridge.ipynb)
-
+## [yabridge](yabridge.md)

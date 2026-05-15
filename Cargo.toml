@@ -3,5 +3,6 @@ resolver = "3"
 members = [
     "reinstallOS",
     "wireguard",
-    "kde_cfg"
+    "kde_cfg",
+    "mihomo"
 ]

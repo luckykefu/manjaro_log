@@ -28,13 +28,11 @@ gpu: amd redeon rx 6750 GRE 12GB
 proxy: [socks5://127.0.0.1:1080, socks5://127.0.0.1:7897]
 ```
 ## 5. Shell 规范
-
-### 语法
 - `[[ ]]` 替代 `[ ]`
-
-### 包管理
-- 系统包: `sudo pacman -S --needed --noconfirm <pkgs>`
-- AUR 包: `yay -S --needed --noconfirm <pkgs>`
+- 系统包安装命令: `sudo pacman -S --needed --noconfirm <pkgs>`
+- AUR包安装命令: `yay -S --needed --noconfirm <pkgs>`
+- jq操作json文件
+- yq操作yaml文件
 
 ### 文件示例
 ```bash
@@ -73,6 +71,7 @@ fi
 
 ### 架构规范
 - 工业级项目架构设计
+- edition = "2024"
 - main.rs:cli配置+runner入口
 - lib.rs: runner逻辑处理调用其他文件夹/文件执行
 - 其余文件分类存放.模块导出
@@ -82,6 +81,7 @@ fi
   - cargo fmt
   - cargo test
   - cargo build
+  - cargo run
   - 这些动作都只针对正在开发的工作空间
 
 ### 文件范例
