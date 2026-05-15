@@ -100,6 +100,7 @@ if [[ "$CUR" != "1" ]]; then
     sudo sysctl -p > /dev/null 2>&1
 fi
 
+sudo iptables -D INPUT -i "@WG_NAME@" -j ACCEPT 2>/dev/null || true
 sudo iptables -D FORWARD -i "@WG_NAME@" -j ACCEPT 2>/dev/null || true
 sudo iptables -t nat -D POSTROUTING -o "@IFACE@" -j MASQUERADE 2>/dev/null || true
 sudo wg show interfaces 2>/dev/null | xargs -r -I{} sudo wg-quick down {} 2>/dev/null || true
@@ -111,8 +112,8 @@ sudo tee "$SVR_CFG" > /dev/null << WGEOF
 Address = @TUNNEL_SERVER@/@SUBNET@
 ListenPort = @PORT@
 PrivateKey = @SERVER_PRIV@
-PostUp = iptables -A FORWARD -i @WG_NAME@ -j ACCEPT || true; iptables -t nat -A POSTROUTING -o @IFACE@ -j MASQUERADE || true
-PostDown = iptables -D FORWARD -i @WG_NAME@ -j ACCEPT || true; iptables -t nat -D POSTROUTING -o @IFACE@ -j MASQUERADE || true
+PostUp = iptables -D INPUT -i @WG_NAME@ -j ACCEPT 2>/dev/null || true; iptables -I INPUT 1 -i @WG_NAME@ -j ACCEPT || true; iptables -A FORWARD -i @WG_NAME@ -j ACCEPT || true; iptables -t nat -A POSTROUTING -o @IFACE@ -j MASQUERADE || true
+PostDown = iptables -D INPUT -i @WG_NAME@ -j ACCEPT 2>/dev/null || true; iptables -D FORWARD -i @WG_NAME@ -j ACCEPT || true; iptables -t nat -D POSTROUTING -o @IFACE@ -j MASQUERADE || true
 
 [Peer]
 PublicKey = @LOCAL_PUB@
@@ -121,6 +122,7 @@ WGEOF
 
 sudo chmod 600 "$SVR_CFG"
 sudo systemctl enable "wg-quick@@WG_NAME@" && sudo systemctl restart "wg-quick@@WG_NAME@"
+sudo iptables -D INPUT -i "@WG_NAME@" -j ACCEPT 2>/dev/null || true; sudo iptables -I INPUT 1 -i "@WG_NAME@" -j ACCEPT || true
 sudo wg show
 "#;
 

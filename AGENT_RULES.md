@@ -70,19 +70,31 @@ fi
 - 文件|函数|参数的命名都必须直观展示其功能,如 convert->csv2parquet
 
 ### 架构规范
-- 工业级项目架构设计
-- edition = "2024"
-- main.rs:cli配置+runner入口
-- lib.rs: runner逻辑处理调用其他文件夹/文件执行
-- 其余文件分类存放.模块导出
-- 每次修改文件之后的动作:
-  - 代码审查直到通过标准
-  - 更新文档DOCSTRING
-  - cargo fmt
-  - cargo test
-  - cargo build
-  - cargo run
-  - 这些动作都只针对正在开发的工作空间
+要求: 工业级项目架构设计
+```
+main_workspace/
+  src/
+  Cargo.toml # edition = "2024"
+  sub_workspace/
+    src/
+      main.rs # cli配置+runner入口
+      lib.rs # runner逻辑处理调用其他模块执行
+      slog.rs # 日志处理
+      model_1.rs # 模块1 代码少则放到一个文件里
+      model_2/ # 模块2 代码多则放到一个目录下
+        mod.rs # 模块导出
+        model_2_1.rs # 模块2.1
+    Cargo.toml # edition = "2024"
+    
+```
+### 每次修改文件之后的动作:
+- 代码审查直到通过标准
+- 更新文档DOCSTRING
+- cargo fmt
+- cargo test
+- cargo build
+- cargo run
+- 这些动作都只针对正在开发的工作空间
 
 ### 文件范例
 ```rust
@@ -117,27 +129,4 @@ fn fn() ->  {
 fn test_fn() {
 
 }
-```
-
-## 7. README.md 格式
-
-### 关联文件
-- file://src/log.rs
-
-### 功能解释
-...
-
-### 入参说明
-| 入参 | 参数 | 类型 | 说明 |
-| ---- | ---- | ---- | ---- |
-|      | ...  |      |      |
-| 返回 |     |     |      |
-
-### ASCII图示处理逻辑
-
-```
-1 做了什么 -> 函数1:
-2 做了什么 -> 函数2:
-... -> ...
-返回 ->
 ```

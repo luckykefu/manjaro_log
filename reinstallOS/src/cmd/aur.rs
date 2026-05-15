@@ -17,7 +17,7 @@
 use crate::run_cmd::{self, RunConfig};
 use crate::sinfo;
 
-const AUR_PKGS: &[&str] = &["clash-verge-rev-bin", "cryptomator-bin"];
+const AUR_PKGS: &[&str] = &["cryptomator-bin"];
 
 /// 安装所有预定义 AUR 包
 pub fn run() -> anyhow::Result<()> {

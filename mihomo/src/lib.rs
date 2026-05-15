@@ -17,6 +17,7 @@
 //! 启动 mihomo: mihomo -d <output_dir>
 //! ```
 
+pub mod check;
 pub mod config;
 pub mod parser;
 pub mod slog;
@@ -59,6 +60,7 @@ pub struct RunConfig {
 /// 3. 解析节点 -> parser::parse_proxies(text)
 /// 4. 生成配置 -> config::generate(proxies, output_dir, nameserver)
 /// 5. 打印启动命令
+/// 6. 连通性测试 -> check::check_connectivity()
 /// ```
 pub fn run(config: RunConfig) -> Result<()> {
     let raw = subscribe::download(&config.subscribe_link, config.proxy.as_deref())?;
@@ -71,10 +73,15 @@ pub fn run(config: RunConfig) -> Result<()> {
 
     config::generate(&proxies, &config.output_dir, &config.nameserver)?;
 
+    let output_str = config.output_dir.display().to_string();
     sinfo!(
         "\n🚀 Start mihomo:\n   nohup mihomo -d {} > /tmp/mihomo.log 2>&1 & disown",
-        config.output_dir.display()
+        output_str
     );
+
+    if !config.skip_start {
+        check::check_connectivity(9097, 7897, &output_str);
+    }
 
     Ok(())
 }

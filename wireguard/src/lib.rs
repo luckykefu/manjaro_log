@@ -145,14 +145,55 @@ pub fn deploy_wireguard(cfg: &WireGuardConfig) -> Result<()> {
                 "sudo wg show 2>&1 || echo 'wg show failed'",
             )
             .unwrap_or_default();
+            let server_iptables = cmd::ssh(
+                &format!("root@{ip}"),
+                "sudo iptables -L INPUT -v -n --line-numbers 2>/dev/null || echo 'iptables show failed'",
+            )
+            .unwrap_or_default();
+            let server_nft = cmd::ssh(
+                &format!("root@{ip}"),
+                "sudo nft list ruleset 2>/dev/null || echo 'nft not available'",
+            )
+            .unwrap_or_default();
+            let server_route = cmd::ssh(
+                &format!("root@{ip}"),
+                "ip route get 10.0.0.1 2>/dev/null || echo 'no route'",
+            )
+            .unwrap_or_default();
+            let server_ping = cmd::ssh(
+                &format!("root@{ip}"),
+                "ping -c 2 -W 2 10.0.0.1 2>&1 || echo 'self ping failed'",
+            )
+            .unwrap_or_default();
+            let server_rp = cmd::ssh(
+                &format!("root@{ip}"),
+                "sysctl net.ipv4.conf.all.rp_filter net.ipv4.conf.202-182-112-91.rp_filter 2>/dev/null || echo 'rp_filter check failed'",
+            )
+            .unwrap_or_default();
+            let client_wg_late = cmd::sudo(&["wg", "show"])
+                .unwrap_or_default();
+            let client_route_svr = cmd::bash_exec(&format!(
+                "ip route get {ip} 2>/dev/null || echo 'no route'"
+            ))
+            .unwrap_or_default();
+            let client_rule = cmd::bash_exec("ip rule show 2>/dev/null || echo 'no rules'")
+                .unwrap_or_default();
             serror!("ping failed: {e}");
             serror!(
-                "--- local interface ---\n{}--- route ---\n{}--- nc ---\n{}--- ss ---\n{}--- remote wg ---\n{}",
+                "--- local interface ---\n{}--- route ---\n{}--- nc ---\n{}--- ss ---\n{}--- remote wg ---\n{}--- remote iptables INPUT ---\n{}--- remote nftables ---\n{}--- remote route get ---\n{}--- remote self ping ---\n{}--- remote rp_filter ---\n{}--- client wg late ---\n{}--- client route to server ---\n{}--- client ip rule ---\n{}",
                 client_iface,
                 client_route,
                 client_nc,
                 client_ss,
-                server_wg
+                server_wg,
+                server_iptables,
+                server_nft,
+                server_route,
+                server_ping,
+                server_rp,
+                client_wg_late,
+                client_route_svr,
+                client_rule
             );
             swarn!("Check:");
             swarn!("  1) Server firewall UDP {} open", cfg.port);

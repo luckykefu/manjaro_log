@@ -6,3 +6,4 @@
 # 说明: 假设 lib/.zsh/export-bin.zsh → 上级上级 = 项目根 → .bin/
 
 export PATH="${0:A:h}/.bin:$PATH"
+export PATH="$HOME/.cargo/bin:$PATH"
