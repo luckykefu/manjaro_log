@@ -11,5 +11,5 @@ EOF
 sudo usermod -aG audio "$USER"
 
 
-# LANGUAGE=zh_CN.UTF-8 ardour8
+# alias LANGUAGE=zh_CN.UTF-8 ardour8
 ```

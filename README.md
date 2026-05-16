@@ -1,15 +1,14 @@
-```bash
-curl -fsSL https://opencode.ai/install | bash
-# https://api3.nimenshishangdi.cc/dazhutou/eebe36f8c2eb695b9841a61eb4b03825
-# 你在远程 可以用ssh lkf@10.0.0.2连接我本地
-ssh -N -R 2222:localhost:22 root@202.182.112.91
-sudo pacman -S --noconfirm openssh && sudo systemctl enable --now sshd
-echo 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAUx2zQPgu5rRWDc3TUyCEBBPLi0R/rnNoDHbvJqvxuw opencode-remote' >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys && echo "OK"
-```
-# ssh 反向代理步骤
-ip=$1
-ssh-keygen -R ip
-ssh-copy-id -i ~/.ssh/id_ed25519.pub root@{ip}
-连接远程,生成ssh key,获取密钥
-# 本地后台建立反向代理
-将密钥写入认证keys
+1,远程部署windguard
+1.1 安装
+1.2 生成配置文件
+1.3 开放防火墙端口
+1.4 关闭已有的服务
+1.5 重启
+2,本地配置
+2.1 安装
+2.2 生成本地配置文件
+2.3 拉取远程密钥替换本地配置文件占位符
+2.4 推送本地密钥到替换远程配置文件占位符
+2.5 重启windguard
+3.错误排查
+4.连通性测试

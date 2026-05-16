@@ -11,8 +11,14 @@ display() {
     while IFS= read -r line; do
         if echo "$line" | grep -q "Modes:"; then
             for entry in $(echo "$line" | grep -oP '\d+:[0-9x@.]+'); do
-                local mid="${entry%%:*}" rest="${entry#*:}" res="${rest%@*}" entry_rate="${rest#*@}"
-                entry_rate="${entry_rate%%.*}"; local w="${res%x*}" h="${res#*x}" area=$((w * h))
+                local mid="${entry%%:*}"
+                local rest="${entry#*:}"
+                local res="${rest%@*}"
+                local entry_rate="${rest#*@}"
+                entry_rate="${entry_rate%%.*}"
+                local w="${res%x*}"
+                local h="${res#*x}"
+                local area=$((w * h))
                 [[ "$entry_rate" == "$target_rate" || $((entry_rate - target_rate)) -lt 2 && $((target_rate - entry_rate)) -lt 2 ]] && [[ $area -gt $best_area ]] && { best_area=$area; best_mid=$mid; }
             done
         fi

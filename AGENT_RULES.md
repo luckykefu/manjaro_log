@@ -1,4 +1,4 @@
-# AGENT_RULES.md
+# AGENT RULES
 
 ## 1. 阅读规则
 
@@ -29,39 +29,29 @@ proxy: [socks5://127.0.0.1:1080, socks5://127.0.0.1:7897]
 ```
 ## 5. Shell 规范
 - `[[ ]]` 替代 `[ ]`
-- 系统包安装命令: `sudo pacman -S --needed --noconfirm <pkgs>`
-- AUR包安装命令: `yay -S --needed --noconfirm <pkgs>`
+- using `[[ ]] && xxx || xxx`, not `if then fi`
+- `sudo pacman -S --needed --noconfirm <pkgs>`
+- `yay -S --needed --noconfirm <pkgs>`
 - jq操作json文件
 - yq操作yaml文件
-
-### 文件示例
-```bash
-#!/bin/bash
-# file.sh
-# 介绍
-# 入参
-# ASCII图示处理逻辑
-
-fn() {
-    local func="<fn>"
-    local var=${1:-}
-    # 1.
-    # 2.
-    cat << EOF
-执行函数: $func
-参数: $var
-EOF
-}
-
-if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
-    fn "$@"
-fi
+- shellcheck 检查代码
+- 文件架构如下:
 ```
-
+sh_workspace/
+  main.sh:入口
+  lib.sh:runner
+  src/:按照执行流程组织文件结构,每个步骤一个文件,酌情合并代码少的步骤
+    model_1.sh
+    ...
+```
+- 开发完成后: run & fix
 ## 6. Rust 规范
 
 ### 文件规范
-- docstring完整: 介绍,入参返回说明,ASCII图示处理逻辑
+- docstring完整: 
+  - 介绍
+  - 入参返回说明表格
+  - ASCII图示处理逻辑
 - 独立配置结构体作为参数
 - 单元测试完整
 - 具备详细debug输出
