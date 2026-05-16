@@ -3,8 +3,8 @@
 #
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/lib.sh"
+cd "$(dirname "${BASH_SOURCE[0]}")" && pwd
+source "lib.sh"
 
 reinstall_os() {
     echo "dark theme"
