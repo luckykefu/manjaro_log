@@ -1,6 +1,6 @@
 # AGENT RULES
 
-## 1. 阅读规则
+- 1. 阅读规则
 
 阅读以下内容
 记住规则
@@ -27,7 +27,7 @@ cpu: intel 12400f
 gpu: amd redeon rx 6750 GRE 12GB
 proxy: [socks5://127.0.0.1:1080, socks5://127.0.0.1:7897]
 ```
-## 5. Shell 规范
+## 4. Shell 规范
 - `[[ ]]` 替代 `[ ]`
 - using `[[ ]] && xxx || xxx`, not `if then fi`
 - `sudo pacman -S --needed --noconfirm <pkgs>`

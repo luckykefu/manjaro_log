@@ -1,67 +1,66 @@
-#!/bin/bash
-# 安装 WhiteSur KDE 主题/图标/光标
-# 入参: KDE_CFG_PROJECT_ROOT, KDE_CFG_PROXY, KDE_CFG_WHITESUR_*_REPO
+#! /usr/bin/env bash
+# theme.sh — 安装并应用 WhiteSur KDE 主题/图标/光标
+# ========================================================
+# 入参说明
+# | 环境变量       | 默认值                          | 说明     |
+# |----------------|---------------------------------|----------|
+# | THEME_PROXY    | socks5://127.0.0.1:1080        | 克隆代理 |
+# |                |                                 |          |
+# | 返回 0         | 全部成功                        |          |
+# | 返回 1         | 有失败项                        |          |
+# ========================================================
+# 处理逻辑:
+#
+# cd 到脚本目录
+#   └─ for entry in [WhiteSur-kde, WhiteSur-icon-theme, WhiteSur-cursors]
+#        ├─ installed()?
+#        │    ├─ 是 → 切换主题/光标
+#        │    └─ 否 → clone + install → 切换主题/光标
 
-SELF_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SELF_DIR/config.sh"
+set -euo pipefail
 
-ensure_repo() {
-    local name="$1" local_path="$2" remote_url="$3"
-    [[ -d "$local_path" ]] && { echo "[INFO] $name 已存在: $local_path"; return 0; }
-    echo "[INFO] 克隆 $name ..."
+cd "$(dirname "${BASH_SOURCE[0]}")"
+THEME_PROXY="${THEME_PROXY:-socks5://127.0.0.1:1080}"
 
-    ALL_PROXY="$KDE_CFG_PROXY" git clone --depth 1 "$remote_url" "$local_path" 2>/dev/null && return 0
-
-    echo "[WARN] 代理克隆失败,尝试直连..."
-    git clone --depth 1 "$remote_url" "$local_path" && return 0
-
-    echo "[ERROR] $name 克隆失败"
-    return 1
+clone() {
+    local d="$1" url="$2"
+    [[ -d "$d" ]] && return 0
+    ALL_PROXY="$THEME_PROXY" git clone --depth 1 "$url" "$d" 2>/dev/null || git clone --depth 1 "$url" "$d"
 }
 
-run_install() {
-    local name="$1" local_path="$2"
-    [[ ! -d "$local_path" ]] && { echo "[ERROR] $name 本地仓库不存在: $local_path"; return 1; }
-    echo "[INFO] 安装 $name ..."
-    (cd "$local_path" && bash ./install.sh) || { echo "[ERROR] $name 安装失败"; return 1; }
-    echo "[INFO] $name 安装完成"
+installed() {
+    case "$1" in
+        WhiteSur-kde)        lookandfeeltool -l 2>/dev/null | grep -qi "WhiteSur" ;;
+        WhiteSur-icon-theme) [[ -f /usr/share/icons/WhiteSur/index.theme || -f "$HOME/.local/share/icons/WhiteSur/index.theme" ]] ;;
+        WhiteSur-cursors)    plasma-apply-cursortheme --list-themes 2>/dev/null | grep -q "WhiteSur-cursors" ;;
+    esac
 }
 
-install_whitesur_theme() {
-    local local_repo="$KDE_CFG_PROJECT_ROOT/WhiteSur-kde"
-    ensure_repo "WhiteSur KDE 主题" "$local_repo" "$KDE_CFG_WHITESUR_KDE_REPO" || return 1
-    local target="$HOME/.local/share/plasma/look-and-feel/WhiteSur"
-    [[ -d "$target" ]] && { echo "[INFO] WhiteSur KDE 主题已安装,跳过"; return 0; }
-    run_install "WhiteSur KDE 主题" "$local_repo"
-}
-
-install_whitesur_icons() {
-    local local_repo="$KDE_CFG_PROJECT_ROOT/WhiteSur-icon-theme"
-    ensure_repo "WhiteSur 图标" "$local_repo" "$KDE_CFG_WHITESUR_ICON_REPO" || return 1
-    local target="$HOME/.local/share/icons/WhiteSur"
-    [[ -d "$target" ]] && { echo "[INFO] WhiteSur 图标已安装,跳过"; return 0; }
-    run_install "WhiteSur 图标" "$local_repo"
-}
-
-install_whitesur_cursors() {
-    local local_repo="$KDE_CFG_PROJECT_ROOT/WhiteSur-cursors"
-    ensure_repo "WhiteSur 光标" "$local_repo" "$KDE_CFG_WHITESUR_CURSORS_REPO" || return 1
-    local target="$HOME/.local/share/icons/WhiteSur-cursors"
-    [[ -d "$target" ]] && { echo "[INFO] WhiteSur 光标已安装,跳过"; return 0; }
-    run_install "WhiteSur 光标" "$local_repo"
+apply_entry() {
+    case "$1" in
+        WhiteSur-kde)
+            local name
+            name=$(lookandfeeltool -l 2>/dev/null | grep -i "WhiteSur" | head -1)
+            [[ -n "$name" ]] && lookandfeeltool -a "$name" --resetLayout
+            ;;
+        WhiteSur-cursors)
+            plasma-apply-cursortheme WhiteSur-cursors 2>/dev/null || true
+            ;;
+    esac
 }
 
 install_mac_themes() {
-    echo "[INFO] 安装 mac themes ..."
-    local ok=0
-    install_whitesur_theme || ((ok++))
-    install_whitesur_icons || ((ok++))
-    install_whitesur_cursors || ((ok++))
-    [[ "$ok" -gt 0 ]] && { echo "[WARN] mac themes 有 $ok 项安装失败"; return 1; }
-    echo "[INFO] mac themes 全部安装完成"
+    local fail=0
+    for entry in WhiteSur-kde WhiteSur-icon-theme WhiteSur-cursors; do
+        if installed "$entry"; then
+            apply_entry "$entry"
+        else
+            clone "$entry" "https://github.com/vinceliuice/$entry" || { ((fail++)); continue; }
+            (cd "$entry" && bash ./install.sh) || { ((fail++)); continue; }
+            apply_entry "$entry"
+        fi
+    done
+    (( fail == 0 )) || return 1
 }
 
-[[ "${BASH_SOURCE[0]}" == "$0" ]] && {
-    load_config
-    install_mac_themes
-}
+[[ "${BASH_SOURCE[0]}" == "$0" ]] && install_mac_themes
