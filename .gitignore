@@ -3,5 +3,6 @@
 # *.ext       — 匹配指定扩展名
 # /dir/       — 仅匹配根目录
 **/.ssh/
-**/.gnupg/
-target/
+**/target/
+**/WhiteSur*/
+**/.zsh/
