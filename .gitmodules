@@ -1,6 +1,0 @@
-[submodule "reinstallOS_sh/lib/.zsh/zsh-sudo"]
-	path = reinstallOS_sh/lib/.zsh/zsh-sudo
-	url = git@github.com:none9632/zsh-sudo.git
-[submodule "kde_cfg_sh/WhiteSur-cursors"]
-	path = kde_cfg_sh/WhiteSur-cursors
-	url = https://github.com/vinceliuice/WhiteSur-cursors

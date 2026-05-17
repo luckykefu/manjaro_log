@@ -32,7 +32,6 @@ sudo tee "/etc/security/limits.d/$USER-audio-unlimited.conf" >/dev/null <<LIMITS
 LIMITS
 
 sudo usermod -aG audio "$USER"
-
 echo "Audio setup done. Re-login or run: newgrp audio"
 
 ```

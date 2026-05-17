@@ -1,5 +1,6 @@
+# shellcheck shell=bash
 _autostart_find_desktop() {
-    local app="$1" dirs=(
+    local app="${1%.desktop}" dirs=(
         /usr/share/applications
         /usr/local/share/applications
         "$HOME/.local/share/applications"
@@ -18,7 +19,7 @@ _autostart_find_desktop() {
 }
 
 autostart() {
-    local apps=("org.cryptomator.Cryptomator.desktop,org.kde.ksshaskpass.desktop")
+    local apps=("org.cryptomator.Cryptomator.desktop" "org.kde.ksshaskpass.desktop")
     [[ ${#apps[@]} -eq 0 ]] && { echo "error: no apps provided" >&2; return 1; }
     local autostart_dir="$HOME/.config/autostart"
     mkdir -p "$autostart_dir"
@@ -29,3 +30,6 @@ autostart() {
         ln -sf "$desktop" "$target" && echo "autostart linked: $app ($(basename "$desktop"))"
     done
 }
+if [[ "${BASH_SOURCE[0]}" == "$0" ]] ;then
+    autostart
+fi
