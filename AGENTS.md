@@ -8,8 +8,8 @@
 
 ## CHAT FORMAT
 
-- LANG: chinese
-- reply format:
+- LANG: CHINESE
+- REPLY FMT:
   - 需求分析: ...
   - 解决方案:
     - 1.
@@ -22,100 +22,93 @@
 
 ## LOCAL ENV
 
-- system: manjaro
-- shell rc: $HOME/.zshrc
-- cpu: intel 12400f
-- gpu: amd redeon rx 6750 GRE 12GB
-- proxy: [socks5://127.0.0.1:1080, socks5://127.0.0.1:7897]
+```toml
+[local.env]
+system="manjaro"
+shell_rc="$HOME/.zshrc"
+cpu="intel 12400f"
+gpu="amd redeon rx 6750 GRE 12GB"
+proxy=["socks5://127.0.0.1:1080", "socks5://127.0.0.1:7890"]
+```
 
 ---
 
 ## Shell RULES
 
-- `[[ ]]` 替代 `[ ]`
-- using `[[ ]] && xxx || xxx`, not `if then fi`
-- `sudo pacman -S --needed --noconfirm <pkgs>`
-- `yay -S --needed --noconfirm <pkgs>`
-- jq for json文件
-- yq for yaml文件
-- shellcheck for synxc
-- 文件架构如下:
+### dev
+
+```bash
+#! /usr/bin/bash
+# sudo pacman -S --needed --noconfirm <pkgs>
+# yay -S --needed --noconfirm <pkgs>
+# jq for json
+# yq for yaml
+# shellcheck
+# more debug
+set -euo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# replace [ ] with [[ ]]
+# replace if then fi with [[ ]] && xxx || xxx
+if [[ "$BASH_SOURCE" != "$0" ]]; then
+    main "$@"
+fi
 ```
-sh_workspace/
-  main.sh: # 入口
-  model_1.sh: # step 1
-  ...
-  README.md # 项目介绍
-  WorFlow.md # 项目执行流程
-  Structure.md # 项目文件结构
-```
-- 开发完成后: run & fix
+
+### review
+
+- debug是否覆盖
+- 代码是否简洁优雅
 
 ## RUST RULES
 
-### 架构规范
+### 开发规范
 
-要求: 工业级项目架构设计
+- 代码简洁高级优雅
+- 高可读性,高可维护性,高可测试性
+- 优先考虑并发,异步,高性能,
+- 完整性:
+  - docstring
+  - 单元测试
+  - 详细debug
+  - 错误处理 thiserror
+- 职责单一性:
+  - 文件
+  - 函数
+  - 如果一个文件之有一个函数,那么文件名和函数名保持一致
+- 命名直观: 如 convert->csv2parquet
 
 ```
 main_workspace/
-  src/
-    main.rs
-    lib.rs
-  sub_workspace/
+    bin/
+    config/ # 配置文件
+        config.toml # 实际运行的配置
+        config.example.toml # 包含所有配置,且每行配置后面跟着注释,
+    data/ # 数据文件
+    reports/ # 报告文件
     src/
-      main.rs # cli配置+runner入口
-      lib.rs # runner逻辑处理调用其他模块执行
-      slog.rs # 日志处理
-      model_1.rs # 模块1 代码少则放到一个文件里
-      model_2/ # 模块2 代码多则放到一个目录下
-        mod.rs # 模块导出
-        model_2_1.rs # 模块2.1
+        main.rs # 入口,负责lib.rs 中的runner的调用,方便移植
+        lib.rs # runner,具体逻辑的实现,
+        log.rs # 统一日志处理
+        error.rs # 错误处理
+        model_1.rs # 模块1 代码少则放到一个文件里
+        model_2/ # 模块2 代码多则放到一个目录下
+            mod.rs
     Cargo.toml # edition = "2024"
-    README.md # 项目介绍
-    WorFlow.md # 项目执行流程
-    Structure.md # 项目文件结构
-  Cargo.toml # edition = "2024"
-  config.toml # 实际运行的配置
-  config.example.toml # 每行配置注释清楚
-  README.md # 项目介绍
-  WorFlow.md # 项目执行流程
-  Structure.md # 项目文件结构
 ```
-### 文件规范
-- docstring完整:
-```
-//! 介绍
-//! ...
-//! ============================
-//! 入参说明
-//! | 入参 | 参数 | 类型 | 说明 |
-//! | ---- | ---- | ---- | ---- |
-//! |      | ...  |      |      |
-//! | 返回  |     |     |      |
-//! =============================
-//! ASCII图示处理逻辑:
-//!
-//! 1 做了什么 -> 函数1:
-//! 2 做了什么 -> 函数2:
-//! ... -> ...
-//! 返回 ->
-//!
-```
-- 独立配置结构体作为参数
-- 单元测试完整
-- 具备详细debug输出
-- 文件职责单一
-- 函数职责单一
-- 文件|函数|参数的命名都必须直观展示其功能,如 convert->csv2parquet
 
+### 工作流
 
-### 每次修改文件之后的动作:
-
-- 代码审查直到通过标准
-- 更新文件DOCSTRING
-- cargo fmt
-- cargo test
-- cargo build
-- cargo run
-- 这些动作都只针对正在开发的工作空间
+- 按照用户要求和开发规范编写代码
+- cargo check -p xxx
+- fix 
+- cargo fmt -p xxx
+- cargo test -p xxx
+- cargo clippy -p xxx
+- cargo build -p xxx
+- cargo run -p xxx
+- code review
+- re dev
+- fix 
+- update docstring
+- git commit
+- update readme

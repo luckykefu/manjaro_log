@@ -3,8 +3,8 @@
 ## ssh 连接 远程电脑
 
 ```bash
-local ip=202.182.112.91
-bash shadowsocks-rust/ssh_copy_id.sh "$ip"
+local ip=64.176.225.208
+bash reinstallOS_sh/shadowsocks-rust/ssh_copy_id.sh "$ip"
 ```
 
 ---

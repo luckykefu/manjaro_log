@@ -81,10 +81,10 @@ sudo mkdir -p /home/.snapshots && sudo btrfs subvolume snapshot -r /home /home/.
 ## packages
 
 ```bash
-local base_pkg=(base-devel yay keepassxc rust zed jq yq shellcheck)
+local base_pkg=(base-devel yay keepassxc rust jq yq shellcheck)
 sudo pacman -S --noconfirm --needed "${base_pkg[@]}"
 curl -fsSL https://opencode.ai/install | bash
-
+curl -f https://zed.dev/install.sh | sh
 local fonts_pkg=(inter-font adobe-source-han-sans-otc-fonts adobe-source-han-serif-otc-fonts noto-fonts noto-fonts-cjk noto-fonts-emoji ttf-dejavu ttf-liberation wqy-microhei wqy-zenhei adobe-source-han-sans-cn-fonts adobe-source-han-serif-cn-fonts ttf-fira-code ttf-roboto)
 sudo pacman -S --noconfirm --needed "${fonts_pkg[@]}"
 sudo btrfs subvolume snapshot -r / /.snapshots/06_packages
@@ -115,13 +115,16 @@ sudo btrfs subvolume snapshot -r / /.snapshots/08_cryptomator
 
 ```bash
 bash lib/tailscale.sh
+# ssh lkf@100.89.218.54 连接我的电脑(远程,ssh 密钥可用
 ```
+
 ## autostart
 
 ```bash
 bash lib/autostart.sh
 sudo btrfs subvolume snapshot -r /home /home/.snapshots/05_autostart
 ```
+
 ## cryptomator keepassxc firefox
 
 ```bash
@@ -129,37 +132,21 @@ sudo btrfs subvolume snapshot -r / /.snapshots/09_cryptomator_keepassxc_firefox_
 sudo btrfs subvolume snapshot -r /home /home/.snapshots/09_cryptomator_keepassxc_firefox_cfg
 ```
 
-
-
-
 ## kde theme
+
 ```bash
 bash kde_cfg_sh/theme.sh
 bash kde_cfg_sh/general.sh
 sudo btrfs subvolume snapshot -r / /.snapshots/10_kde_cfg
 sudo btrfs subvolume snapshot -r /home /home/.snapshots/10_kde_cfg
 ```
+
 ## telegram
+
 ```bash
 sudo pacman -S --noconfirm --needed telegram-desktop
 sudo btrfs subvolume snapshot -r / /.snapshots/11_telegram
 sudo btrfs subvolume snapshot -r /home /home/.snapshots/11_telegram
-```
-## Cargo 镜像
-
-```bash
-mkdir -p ~/.cargo
-cat > ~/.cargo/config.toml << 'EOF'
-[source.crates-io]
-replace-with = 'rsproxy'
-[source.rsproxy] registry = "https://rsproxy.cn/crates.io-index"
-# 稀疏索引（Rust 1.68+ 支持，速度更快）
-# [source.rsproxy-sparse]
-# registry = "sparse+https://rsproxy.cn/index/"
-# [registries.rsproxy]
-# index = "https://rsproxy.cn/crates.io-index"
-# 设置代理
-# [net]
-# git-fetch-with-cli = true
-EOF
+sudo btrfs subvolume snapshot -r / /.snapshots/12_zed
+sudo btrfs subvolume snapshot -r /home /home/.snapshots/12_zed
 ```
