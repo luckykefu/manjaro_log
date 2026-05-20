@@ -180,5 +180,4 @@ bash lib/create_snapshot.sh 017_tailscale
 ```bash
 sudo pacman -S --noconfirm --needed telegram-desktop
 bash lib/create_snapshot.sh 018_telegram
-
 ```
