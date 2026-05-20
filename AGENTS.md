@@ -54,10 +54,6 @@ if [[ "$BASH_SOURCE" != "$0" ]]; then
 fi
 ```
 
-### review
-
-- debug是否覆盖
-- 代码是否简洁优雅
 
 ## RUST RULES
 
@@ -68,7 +64,8 @@ fi
 - 优先考虑并发,异步,高性能,
 - 完整性:
   - docstring
-  - 单元测试
+  - 注释
+  - 单元测试 真实网络测试
   - 详细debug
   - 错误处理 thiserror
 - 职责单一性:

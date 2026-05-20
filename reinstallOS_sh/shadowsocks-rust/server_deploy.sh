@@ -1,16 +1,15 @@
 #!/usr/bin/env bash
 gen_ss_cfg(){
-    local PASS
-    PASS=$(ssservice genkey -m "2022-blake3-aes-256-gcm")
+    local PASS=$(ssservice genkey -m "2022-blake3-aes-256-gcm")
     sudo mkdir -p /etc/shadowsocks-rust
     sudo tee /etc/shadowsocks-rust/config.json << EOF
-    {
-        "server": "0.0.0.0",
-        "server_port": 8388,
-        "password": "${PASS}",
-        "method": "2022-blake3-aes-256-gcm",
-        "mode": "tcp_and_udp"
-    }
+{
+    "server": "0.0.0.0",
+    "server_port": 8388,
+    "password": "${PASS}",
+    "method": "2022-blake3-aes-256-gcm",
+    "mode": "tcp_and_udp"
+}
 EOF
 }
 ss_systemd_cfg(){
@@ -21,8 +20,8 @@ ss_systemd_cfg(){
     sudo systemctl enable --now shadowsocks-rust-server@config.service
 }
 port_open() {
-    local port="${1:-8388}"
-    local proto="${2:-tcp}"
+    local port="8388"
+    local proto=tcp
 
     if command -v firewall-cmd &>/dev/null; then
         echo "==> firewalld  detected"
@@ -43,5 +42,5 @@ sudo pacman -S --needed --noconfirm shadowsocks-rust
 gen_ss_cfg
 ss_systemd_cfg
 port_open
-sudo systemctl status shadowsocks-rust-server@config.service
+# sudo systemctl status shadowsocks-rust-server@config.service
 ss -tlnp | grep 8388
