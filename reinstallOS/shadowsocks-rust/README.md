@@ -3,8 +3,8 @@
 ## ssh 连接 远程电脑
 
 ```bash
-local ip=64.176.225.208
-bash reinstallOS_sh/shadowsocks-rust/ssh_copy_id.sh "$ip"
+ip=64.176.225.208
+bash shadowsocks-rust/ssh_copy_id.sh "$ip"
 ```
 
 ---
@@ -25,5 +25,6 @@ ssh "root@${ip}" "bash server_deploy.sh"
 # jq 修改配置 setup_cfg
 # 启动 start
 # 验证
+ip=64.176.225.208
 bash shadowsocks-rust/client_cfg.sh $ip
 ```

@@ -14,6 +14,8 @@
 #   ↓
 #   curl 订阅 → config.yaml (走 shadowsocks 代理下载)
 #   ↓
+#   防火墙放行 mixed-port
+#   ↓
 #   nohup mihomo -d .
 #   ↓
 #   curl gstatic → 检测连通性
@@ -36,7 +38,8 @@ main() {
     [[ -z "$url" ]] && { sed -n "4,7p" "$0"; exit 1; }
 
     deploy "$url"
-    start "$PWD"
+    port_open
+    start "$PWD" || echo "==> 注意: start 返回非零，但 mihomo 可能仍在运行"
 }
 
 main "$@"

@@ -19,7 +19,7 @@ _autostart_find_desktop() {
 }
 
 autostart() {
-    local apps=("org.cryptomator.Cryptomator.desktop" "org.kde.ksshaskpass.desktop")
+    local apps=("org.cryptomator.Cryptomator.desktop")
     [[ ${#apps[@]} -eq 0 ]] && { echo "error: no apps provided" >&2; return 1; }
     local autostart_dir="$HOME/.config/autostart"
     mkdir -p "$autostart_dir"
