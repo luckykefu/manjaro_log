@@ -47,7 +47,7 @@ sudo chown -R "$USER:$USER" /data
 sudo mkdir -p /.snapshots && sudo btrfs subvolume snapshot -r / /.snapshots/003_base_cfg
 ```
 
-## zed
+## zed opencode
 
 ```bash
 
@@ -129,7 +129,7 @@ bash lib/create_snapshot.sh 011_kde
 ## packages
 
 ```bash
-base_pkg=(base-devel yay keepassxc rust jq yq shellcheck)
+base_pkg=(base-devel yay keepassxc jq yq shellcheck)
 sudo pacman -S --noconfirm --needed "${base_pkg[@]}"
 bash lib/create_snapshot.sh 012_base_pkg
 
@@ -171,7 +171,7 @@ bash lib/create_snapshot.sh 016_shadowsocks-rust
 
 ```bash
 bash lib/tailscale.sh
-# ssh lkf@100.113.252.1 连接我的电脑(远程,ssh 密钥可用
+
 bash lib/create_snapshot.sh 017_tailscale
 ```
 
@@ -180,4 +180,14 @@ bash lib/create_snapshot.sh 017_tailscale
 ```bash
 sudo pacman -S --noconfirm --needed telegram-desktop
 bash lib/create_snapshot.sh 018_telegram
+```
+## nautilustrader
+
+```bash
+curl https://sh.rustup.rs -sSf | sh
+sudo pacman -S --noconfirm --needed clang lld
+sudo pacman -S --noconfirm --needed capnproto
+sudo pacman -S  --noconfirm --needed redis
+sudo systemctl enable --now redis
+bash lib/create_snapshot.sh 019_nautilustrader
 ```
