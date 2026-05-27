@@ -7,7 +7,7 @@ deploy() {
     sudo pacman -S --needed --noconfirm archlinuxcn/mihomo
 
     echo "==> 通过 shadowsocks 代理下载订阅配置..."
-    curl -sx socks5://127.0.0.1:1080 \
+    curl -s \
         -A 'clash.meta' \
         -o config.yaml "$url"
 
