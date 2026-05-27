@@ -1,32 +1,32 @@
-```python
-!sudo pacman -S waydroid --noconfirm --needed
+```bash
+sudo pacman -S waydroid --noconfirm --needed
 ```
 
-```python
+```bash
 ## >>> 更改 Waydroid 数据目录 >>>
-!mkdir -p /data/.waydroid
-!sudo rm -fr /var/lib/waydroid
-!sudo ln -sf /data/.waydroid /var/lib/waydroid
+mkdir -p /data/.waydroid
+sudo rm -fr /var/lib/waydroid
+sudo ln -sf /data/.waydroid /var/lib/waydroid
 ```
 
-```python
-!all_proxy="socks5://192.168.0.103:7897" sudo waydroid init
+```bash
+all_proxy="socks5://192.168.0.103:7897" sudo waydroid init
 ```
 
-```python
+```bash
 
-!sudo systemctl start waydroid-container.service
-!sudo pacman -S --needed --noconfirm python-dbus
+sudo systemctl start waydroid-container.service
+sudo pacman -S --needed --noconfirm bash-dbus
 ```
 
-```python
+```bash
 
 ## no internet connection
-!all_proxy="socks5://192.168.0.103:7897" yay -S waydroid-script-git --noconfirm --needed
+all_proxy="socks5://192.168.0.103:7897" yay -S waydroid-script-git --noconfirm --needed
 ```
 
-```python
-!all_proxy="socks5://192.168.0.103:7897" sudo waydroid-extras install libhoudini
+```bash
+all_proxy="socks5://192.168.0.103:7897" sudo waydroid-extras install libhoudini
 
 ```
 
@@ -34,7 +34,6 @@
 
 
 ```bash
-%%bash
 ## >>> 保存 iptables 规则永久生效 >>>
 waydroid_net() {
     iface=$(ip route | grep default | awk '{print $5}' | head -1)
@@ -53,10 +52,10 @@ waydroid_net
 waydroid show-full-ui
 ```
 
-```python
-!waydroid app install /home/lkf/Downloads/APK/应用宝.apk
+```bash
+waydroid app install /home/lkf/Downloads/APK/应用宝.apk
 ```
 
-```python
-!waydroid session stop
+```bash
+waydroid session stop
 ```

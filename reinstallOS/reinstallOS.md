@@ -1,11 +1,13 @@
 ## org
 
 ```bash
-sudo mkdir -p /.snapshots 
+sudo mkdir -p /.snapshots
 ls -a /.*
 sudo btrfs subvolume snapshot -r / /.snapshots/000_org
 ```
+
 ## sudo nopassword
+
 ```bash
 sudoers_file="/etc/sudoers.d/${USER}_nopassword"
 echo "$USER ALL=(ALL) NOPASSWD: ALL" | sudo tee $sudoers_file
@@ -13,7 +15,9 @@ sudo chmod 0440 "$sudoers_file"
 sudo visudo -c
 reinstallOS/lib/create_snapshot.sh 000_sudo_nopassword
 ```
+
 ## base cfg
+
 ```bash
 bash reinstallOS/lib/base_cfg.sh
 reinstallOS/lib/create_snapshot.sh 001_base_cfg
@@ -50,4 +54,10 @@ app=cryptomator
 found=$(find /usr/share/applications -iname "*${app}*" -name "*.desktop" -print -quit 2>/dev/null)
 cp -f "$found" "$HOME/.config/autostart/$(basename "$found")" && ls $HOME/.config/autostart
 reinstallOS/lib/create_snapshot.sh 010_cryptomator
+```
+
+## cfg app
+
+```bash
+reinstallOS/lib/create_snapshot.sh 013_app_cfg
 ```

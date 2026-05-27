@@ -16,9 +16,12 @@ pub=$(ssh root@$ip "cat ~/.ssh/id_ed25519.pub")
 echo "$pub" >> ~/.ssh/authorized_keys
 
 ssh root@$ip "reboot"
+
 ssh root@$ip
 .opencode/bin/opencode
+
 #  你是远程服务器
-# 请用 ssh lkf@100.113.252.1 连接我的电脑(远程,ssh 密钥可用
+# 请用 ssh  lkf@100.103.59.55。连接我的电脑(远程,ssh 密钥可用
 # 传输文本方式: 写入本地,scp
+
 ```

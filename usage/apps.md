@@ -1,17 +1,17 @@
 ## Docker
 ```bash
 echo "Installing docker..."
-sudo pacman -S --noconfirm --needed docker >/dev/null
+sudo pacman -S --noconfirm --needed docker 
 
 ### 配置 Docker
 
 daemon_file="/etc/docker/daemon.json"
 sudo mkdir -p "$(dirname $daemon_file)"
 sudo cp docker.config.json "$daemon_file"
-sudo systemctl stop docker &>/dev/null
-sudo usermod -aG docker "$USER" &>/dev/null
+sudo systemctl stop docker 
+sudo usermod -aG docker "$USER" 
 sudo systemctl daemon-reload
-sudo systemctl start docker &>/dev/null
+sudo systemctl start docker 
 echo "✓ Docker configured"
 echo "⚠ Please logout and login again for group changes to take effect"
 ```
@@ -23,10 +23,10 @@ echo "⚠ Please logout and login again for group changes to take effect"
 set -euo pipefail
 
 echo "Installing ardour..."
-sudo pacman -S --noconfirm --needed ardour >/dev/null
+sudo pacman -S --noconfirm --needed ardour 
 
 sudo mkdir -p /etc/security/limits.d
-sudo tee "/etc/security/limits.d/$USER-audio-unlimited.conf" >/dev/null <<LIMITS
+sudo tee "/etc/security/limits.d/$USER-audio-unlimited.conf"  <<LIMITS
 @audio   -  rtprio     95
 @audio   -  memlock    unlimited
 LIMITS
@@ -62,10 +62,10 @@ LD_PRELOAD="/usr/lib/libgio-2.0.so /usr/lib/libgmodule-2.0.so /usr/lib/libglib-2
 echo "Installing virtualbox..."
 sudo pacman -S --noconfirm --needed virtualbox \
 	linux$(uname -r | cut -d. -f1-2 | tr -d . | head -c3)-virtualbox-host-modules \
-	virtualbox-ext-vnc >/dev/null
+	virtualbox-ext-vnc 
 
 for mod in vboxdrv vboxnetadp vboxnetflt; do
-	sudo modprobe "$mod" >/dev/null && echo "  ✓ Loaded $mod" || echo "  ✗ Failed to load $mod"
+	sudo modprobe "$mod"  && echo "  ✓ Loaded $mod" || echo "  ✗ Failed to load $mod"
 done
 sudo usermod -aG vboxusers "$USER" && echo "  ✓ Added $USER to vboxusers group"
 ```
