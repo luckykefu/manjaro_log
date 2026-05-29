@@ -7,7 +7,10 @@
 
 # 创建只读快照
 sudo mkdir -p /.snapshots
-sudo btrfs subvolume snapshot -r / /.snapshots/reinstall_os_root
+sudo btrfs subvolume snapshot / /.snapshots/reinstall_os_root
+
+sudo mkdir -p /home/.snapshots
+sudo btrfs subvolume snapshot /home /home/.snapshots/004_app_cfg
 # 列出快照
 sudo btrfs subvolume list / 
 # 删除快照
