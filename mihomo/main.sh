@@ -1,45 +1,24 @@
 #! /usr/bin/env bash
-# main.sh — mihomo 一站式配置
-# ========================================================
-# 入参说明
-# | 选项             | 默认值 | 说明    |
-# |------------------|--------|---------|
-# | --subscribe URL  | (必填)  | 订阅链接 |
-# |                  |        |         |
-# | 返回 0           | 成功   |         |
-# | 返回 1           | 失败   |         |
-# ========================================================
-# 处理逻辑:
-#   sudo pacman -S mihomo
-#   ↓
-#   curl 订阅 → config.yaml (走 shadowsocks 代理下载)
-#   ↓
-#   防火墙放行 mixed-port
-#   ↓
-#   nohup mihomo -d .
-#   ↓
-#   curl gstatic → 检测连通性
-
+# 安装
+# 拉取配置
+# 启动(pkill 先)
+# 检测端口
+# 检测连通性
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")"
 
-source ./deploy.sh
-source ./start.sh
+url="${1:?Usage: $0 <subscribe-url>}"
 
-main() {
-    local url=""
+sudo pacman -S --needed --noconfirm mihomo
+curl -sLA 'clash.meta' -o config.yaml --connect-timeout 10 --max-time 30 "$url" || true
+sudo pkill mihomo 2>/dev/null || true
+setsid mihomo -d "$PWD" > /tmp/mihomo.log 2>&1 &
 
-    while [[ $# -gt 0 ]]; do case "$1" in
-        --subscribe|-s) url="$2"; shift 2 ;;
-        --help|-h) sed -n "4,7p" "$0"; exit 0 ;;
-        *) echo "unknown: $1"; exit 1 ;;
-    esac; done
+for _ in 1 2 3 4 5; do
+  ss -tlnp 2>/dev/null | grep -q ":7890 " && break
+  sleep 1
+done
+ss -tlnp 2>/dev/null | grep -q ":7890 " || { echo "port fail" >&2; exit 1; }
 
-    [[ -z "$url" ]] && { sed -n "4,7p" "$0"; exit 1; }
-
-    deploy "$url"
-    port_open
-    start "$PWD" || echo "==> 注意: start 返回非零，但 mihomo 可能仍在运行"
-}
-
-main "$@"
+code=$(curl -sx http://127.0.0.1:7890 -o /dev/null -w "%{http_code}" --connect-timeout 10 "http://www.gstatic.com/generate_204" || echo "")
+[[ "$code" == "204" ]] && { echo ok; exit 0; } || { echo "connectivity fail (HTTP $code)" >&2; exit 1; }

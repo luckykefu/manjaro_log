@@ -17,5 +17,9 @@ sudo btrfs subvolume delete /mnt/@snapshots/@_old
 ## 系统还原
 
 ```bash
-sudo btrfs subvolume snapshot /.snapshots/reinstall_os_root /
+
+sudo mount /dev/nvme0n1p2 /mnt
+sudo mv /mnt/@ /mnt/@_bak
+sudo btrfs subvolume snapshot /mnt/@_bak/.snapshots/000_org /mnt/@
+
 ```
