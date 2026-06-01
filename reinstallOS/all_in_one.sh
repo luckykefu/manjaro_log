@@ -1,50 +1,63 @@
-create_snapshot(){
-    local snapshot_name=$1
-    local dir=/.snapshots/"$snapshot_name"
-    sudo mkdir -p /.snapshots
-    [[ -d "$dir" ]] && echo "$dir" && return 0
-    sudo btrfs subvolume snapshot / /.snapshots/"$snapshot_name"
-    ls -a /.snapshots
+create_snapshot() {
+    local name="${1:?snapshot name required}"
+    local dir="/.snapshots/$name"
+
+    sudo mkdir -p /.snapshots || return 1
+    [[ -d "$dir" ]] && { echo "exists: $dir"; return 2; }
+
+    sudo btrfs subvolume snapshot / "$dir"
 }
 
-sudo_nopassword(){
+sudo_nopassword() {
     local sudoers_file="/etc/sudoers.d/${USER}_nopassword"
-    sudo test -f "$sudoers_file" && echo "$sudoers_file" && return 0
-    echo "$USER ALL=(ALL) NOPASSWD: ALL" | sudo tee $sudoers_file
-    sudo chmod 0440 "$sudoers_file"
-    sudo visudo -c
+
+    sudo test -f "$sudoers_file" && { echo "exists: $sudoers_file"; return 2; }
+
+    echo "$USER ALL=(ALL) NOPASSWD: ALL" | sudo tee "$sudoers_file" > /dev/null \
+        && sudo chmod 0440 "$sudoers_file" \
+        && sudo visudo -c &>/dev/null \
+        || { sudo rm -f "$sudoers_file"; echo "failed, rolled back" >&2; return 1; }
 }
 
 pacman_cfg() {
-    local pacman_conf="/etc/pacman.conf" block_begin="# add by pacman_cfg" block_end="# end add by pacman_cfg"
-    sudo sed -i "/^${block_begin}$/,/^${block_end}$/d" "$pacman_conf"
-    sudo tee -a "$pacman_conf" > /dev/null << 'EOF'
+    local conf="/etc/pacman.conf"
+    local mark="# pacman_cfg"
 
-# add by pacman_cfg
+    sudo sed -i "/${mark}/,/${mark}/d" "$conf" \
+        && sudo tee -a "$conf" > /dev/null << EOF
+${mark}
 [archlinuxcn]
 SigLevel = Optional TrustedOnly
-Server = https://mirrors.ustc.edu.cn/archlinuxcn/$arch
-# end add by pacman_cfg
-EOF
-    sudo pacman -Syy --noconfirm
-    sudo pacman -S --noconfirm --needed archlinuxcn-keyring
-    echo "pacman-cfg done"
+Server = https://mirrors.ustc.edu.cn/archlinuxcn/\$arch
+${mark}
+EOF\
+        && sudo pacman -Sy --noconfirm \
+        && sudo pacman -S --noconfirm --needed archlinuxcn-keyring \
+        || { echo "${mark} failed" >&2; return 1; }
+
+    echo "${mark} done"
 }
-git_cfg(){
+git_cfg() {
     local name="${1:-kefu}"
     local email="${2:-19157521820@163.com}"
-    git config --global user.name "$name"
-    git config --global user.email "$email"
-    git config --global init.defaultBranch main
-    git config --global credential.helper libsecret
-    echo "git configured"
 
+    git config --global \
+        user.name "$name" \
+        user.email "$email" \
+        init.defaultBranch main \
+        credential.helper libsecret \
+        || { echo "git_cfg failed" >&2; return 1; }
+
+    echo "git_cfg done"
 }
-gpg_cfg(){
+gpg_cfg() {
     local name="${1:-kefu}" email="${2:-19157521820@163.com}" passphrase="${3:-lkf.Gpg.mima3}"
-    gpg --list-keys "$email" &>/dev/null || {
-        local batch_file=$(mktemp)
-        cat > "$batch_file" << BATCHEOF
+
+    gpg --list-keys "$email" &>/dev/null && { echo "gpg_cfg exists"; return 2; }
+
+    gpgconf --kill gpg-agent 2>/dev/null || true
+
+    gpg --batch --gen-key <(cat << EOF
 Key-Type: eddsa
 Key-Curve: ed25519
 Subkey-Type: ecdh
@@ -54,51 +67,53 @@ Name-Email: $email
 Expire-Date: 0
 Passphrase: $passphrase
 %commit
-BATCHEOF
-        gpgconf --kill gpg-agent 2>/dev/null || true
-        gpg --batch --gen-key "$batch_file"
-        rm -f "$batch_file"
-    }
-    echo "GPG done"
+EOF
+    ) || { echo "gpg_cfg failed" >&2; return 1; }
+
+    echo "gpg_cfg done"
 }
 
-linker(){
-    local src=$1
-    local dst=$2
+ssh_cfg() {
+    local email="${1:-kefu1820@gmail.com}"
+    local src="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/src/.ssh"
+    local dst="$HOME/.ssh"
+
     [[ ! -d "$src" ]] && {
         mkdir -p "$src"
         local args=(-t ed25519 -f "$src/id_ed25519" -N "")
         [[ -n "$email" ]] && args+=(-C "$email")
         ssh-keygen "${args[@]}"
     }
-    rm -rf "$dst" && ln -sf "$src" "$dst"
-}
-ssh_cfg() {
-    local email="${1:-'kefu1820@gmail.com'}"
-    local src="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/src/.ssh"
-    local dst="$HOME/.ssh"
-    linker "$src" "$dst"
-    echo "ssh Done"
+
+    [[ -e "$dst" ]] && rm -rf "$dst"
+    ln -sf "$src" "$dst" || { echo "ssh_cfg failed" >&2; return 1; }
+
+    echo "ssh_cfg done"
 }
 zshrc_cfg() {
-    local block_begin="# add by source_shrc" block_end="# end by source_shrc" rc_file="${1:-$HOME/.zshrc}"
+    local rc_file="${1:-$HOME/.zshrc}"
     local zsh_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/src/.zsh"
-    sed -i "/^$block_begin/,/^$block_end/d" "$rc_file" 2>/dev/null || true
-    cat >> "$rc_file" << EOF
+    local mark="# zshrc_cfg"
 
-$block_begin
+    sed -i "/^${mark}$/,/^${mark}$/d" "$rc_file" 2>/dev/null || true
+
+    cat >> "$rc_file" << EOF
+${mark}
 mnt="$zsh_dir"
 [[ -d "\$mnt" ]] && while IFS= read -r -d '' f; do source "\$f"; done < <(find "\$mnt" -type f -name '*.zsh' -print0)
-$block_end
+${mark}
 EOF
-    echo "zshrc configured at $rc_file"
+
+    echo "zshrc_cfg done"
 }
-autostart(){
+autostart() {
+    mkdir -p "$HOME/.config/autostart"
     for app in "$@"; do
-        found=$(find /usr/share/applications -iname "*${app}*" -name "*.desktop" -print -quit 2>/dev/null)
-        [ -n "$found" ] && cp -f "$found" "$HOME/.config/autostart/$(basename "$found")"
+        local found=$(find /usr/share/applications -iname "*${app}*.desktop" -print -quit 2>/dev/null)
+        [[ -n "$found" ]] && cp -f "$found" "$HOME/.config/autostart/$(basename "$found")" \
+            && echo "autostart: $app" \
+            || echo "autostart: $app not found" >&2
     done
-    ls "$HOME/.config/autostart"
 }
 step=000_org && echo "$step"
 create_snapshot "$step"
@@ -143,7 +158,6 @@ sudo systemctl enable --now redis
 sudo systemctl enable --now tailscaled
 sudo systemctl enable --now sshd
 kwriteconfig6 --file kwinrc --group Wayland --key InputMethod /usr/share/applications/org.fcitx.Fcitx5.desktop
-
 
 curl -fsSL https://opencode.ai/install | sh
 curl -f https://zed.dev/install.sh | sh

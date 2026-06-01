@@ -1,30 +1,21 @@
-# Shadowsocks-Rust Cargo 安装部署教程
+# shadowsocks-rust 一键部署
 
-## ssh 连接 远程电脑
-
+## 1. 推送 SSH 公钥（只需首次）
 ```bash
-ip=202.182.112.91
-bash shadowsocks-rust/ssh_copy_id.sh "$ip"
+IP=207.148.70.143
+
+ssh_copy_id "$IP"
 ```
 
----
-
-## 服务端部署（VPS）
+## 2. 部署服务端
 
 ```bash
-scp shadowsocks-rust/server_deploy.sh "root@${ip}":server_deploy.sh
-ssh "root@${ip}" "bash server_deploy.sh"
+scp server_deploy.sh "root@${IP}":~
+ssh "root@${IP}" "bash ~/server_deploy.sh"
 ```
 
----
-
-## 客户端部署（本地）
+## 3. 配置本地客户端
 
 ```bash
-# 从远程拉去配置 get_remote_cfg
-# jq 修改配置 setup_cfg
-# 启动 start
-# 验证
-ip=64.176.225.208
-bash shadowsocks-rust/client_cfg.sh $ip
+bash client_cfg.sh "$IP"
 ```

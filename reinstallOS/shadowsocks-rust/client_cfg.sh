@@ -1,71 +1,48 @@
 #!/usr/bin/env bash
-remote_ip="${1:-202.182.112.91}"
-local_port="1080"
-local_addr="0.0.0.0"
+# client_cfg.sh — 本地：从 VPS 拉取配置并启动 ss 客户端
+set -euo pipefail
 
-install_ss() {
-    sudo pacman -S --needed --noconfirm shadowsocks-rust
-}
+readonly LOCAL_ADDR="0.0.0.0"
+readonly LOCAL_PORT=1080
+readonly SS_CFG=/etc/shadowsocks-rust/config.json
 
-get_remote_cfg() {
-    tmpf=$(mktemp)
+fetch_and_patch_config() {
+    local remote_ip="$1"
+    local tmpf
+    tmpf=$(mktemp --suffix=.json)
     trap 'rm -f "$tmpf"' EXIT
-    echo "==> 从 ${remote_ip} 拉取服务端配置..."
-    scp "root@${remote_ip}:/etc/shadowsocks-rust/config.json" "$tmpf"
+
+    scp "root@${remote_ip}:${SS_CFG}" "$tmpf"
+
+    sudo mkdir -p "$(dirname "$SS_CFG")"
+    jq --arg  server     "$remote_ip"   \
+       --arg  local_addr "$LOCAL_ADDR"  \
+       --argjson local_port "$LOCAL_PORT" \
+       '.server = $server | .local_address = $local_addr | .local_port = $local_port' \
+       "$tmpf" | sudo tee "$SS_CFG" > /dev/null
+    echo "客户端配置写入 $SS_CFG"
 }
 
-gen_client_cfg() {
-    echo "==> 生成客户端配置..."
-    sudo mkdir -p /etc/shadowsocks-rust
-    jq --arg server "$remote_ip" \
-       --arg local_addr "$local_addr" \
-       --argjson local_port "$local_port" \
-       '.server = $server | . + {local_address: $local_addr, local_port: $local_port}' \
-       "$tmpf" | sudo tee /etc/shadowsocks-rust/config.json > /dev/null
-}
-
-stop_old_instances() {
-    echo "==> 停掉已有客户端实例..."
+setup_service() {
+    echo "重启 shadowsocks-rust 客户端"
     sudo systemctl stop    'shadowsocks-rust@*' 2>/dev/null || true
     sudo systemctl disable 'shadowsocks-rust@*' 2>/dev/null || true
     sudo pkill -x ssservice 2>/dev/null || true
-}
-
-start_ss() {
-    echo "==> 启动 shadowsocks-rust 客户端..."
     sudo systemctl enable --now shadowsocks-rust@config.service
 }
 
-port_open() {
-    local port="$local_port"
-    local proto=tcp
-
-    if command -v firewall-cmd &>/dev/null; then
-        echo "==> firewalld detected"
-        sudo firewall-cmd --add-port="${port}/${proto}" --permanent 2>/dev/null || true
-        sudo firewall-cmd --reload 2>/dev/null || true
-    elif command -v ufw &>/dev/null; then
-        echo "==> ufw detected"
-        sudo ufw allow "${port}/${proto}" 2>/dev/null || true
-    elif command -v iptables &>/dev/null; then
-        echo "==> iptables detected"
-        sudo iptables -C INPUT -p "${proto}" --dport "${port}" -j ACCEPT 2>/dev/null ||
-            sudo iptables -A INPUT -p "${proto}" --dport "${port}" -j ACCEPT
-    else
-        echo "==> 未检测到防火墙工具，跳过"
-    fi
-}
-
 verify() {
-    echo "==> 验证..."
+    echo "验证"
     sudo systemctl status shadowsocks-rust@config.service --no-pager -l
-    sudo ss -tlnp | grep ":${local_port} "
+    ss -tlnp | grep ":${LOCAL_PORT} " || echo "端口 $LOCAL_PORT 未监听"
+    echo "客户端就绪 ✓"
 }
 
-install_ss
-get_remote_cfg
-gen_client_cfg
-stop_old_instances
-port_open
-start_ss
+remote_ip="${1:?用法: $0 <VPS-IP>}"
+require_ip "$remote_ip"
+
+sudo pacman -S --needed --noconfirm shadowsocks-rust jq
+fetch_and_patch_config "$remote_ip"
+setup_service
+open_port "$LOCAL_PORT" tcp
 verify
