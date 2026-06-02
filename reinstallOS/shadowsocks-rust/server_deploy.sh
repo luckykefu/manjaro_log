@@ -6,7 +6,6 @@ readonly SS_PORT=8388
 readonly SS_CFG=/etc/shadowsocks-rust/config.json
 readonly SS_METHOD="2022-blake3-aes-256-gcm"
 
-
 gen_config() {
     echo "生成服务端配置"
     local pass

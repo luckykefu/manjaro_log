@@ -1,7 +1,3 @@
-# AGENT RULES
-
-## 本次对话应始终记住以下规则
-
 ## CHAT FORMAT
 
 - LANG: CHINESE
