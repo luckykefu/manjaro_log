@@ -38,7 +38,7 @@
 待审查代码路径/内容：
 
 ```
-/data/nutilustrader/creats/common/src/config
+/data/nutilustrader/creats/run-live
 ```
 
 # 远程
