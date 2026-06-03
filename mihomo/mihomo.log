@@ -200,3 +200,4 @@ time="2026-06-03T23:59:04.671665608Z" level=info msg="[TCP] mihomo --> 223.5.5.5
 time="2026-06-03T23:59:04.673929829Z" level=info msg="[TCP] mihomo --> 223.5.5.5:443 match GeoIP(cn) using DIRECT"
 time="2026-06-03T23:59:04.675411561Z" level=info msg="[TCP] mihomo --> 223.5.5.5:443 match GeoIP(cn) using DIRECT"
 time="2026-06-03T23:59:04.676575940Z" level=info msg="[TCP] mihomo --> 223.5.5.5:443 match GeoIP(cn) using DIRECT"
+time="2026-06-03T23:59:11.181422950Z" level=info msg="[TCP] 198.18.0.1:60816 --> github.com:22 match DomainKeyword(github) using 🐮牛逼[🇯🇵AWS日本01|流媒体解锁]"
