@@ -146,7 +146,7 @@ create_snapshot "$step"
 step=004_app_cfg && echo "$step"
 base_pkg=(base-devel yay keepassxc jq yq shellcheck telegram-desktop tailscale)
 fonts_pkg=(inter-font adobe-source-han-sans-otc-fonts adobe-source-han-serif-otc-fonts noto-fonts noto-fonts-cjk noto-fonts-emoji ttf-dejavu ttf-liberation wqy-microhei wqy-zenhei adobe-source-han-sans-cn-fonts adobe-source-han-serif-cn-fonts ttf-fira-code ttf-roboto)
-rust_pkg=(rust clang lld capnproto redis)
+rust_pkg=(rust rust-analyzer clang lld capnproto redis)
 fcitx5_pkg=(fcitx5 fcitx5-gtk fcitx5-qt fcitx5-configtool fcitx5-chinese-addons fcitx5-pinyin-zhwiki)
 sudo pacman -Sy --noconfirm --needed "${base_pkg[@]}" "${fonts_pkg[@]}" "${rust_pkg[@]}" "${fcitx5_pkg[@]}"
 

@@ -38,7 +38,7 @@
 待审查代码路径/内容：
 
 ```
-/data/nutilustrader/creats/run-backtest-node
+/data/nutilustrader/creats/pq-view
 ```
 
 # 远程

@@ -2,6 +2,8 @@
 # main.sh — 一键完成：推公钥 → 部署服务端 → 配置客户端
 set -euo pipefail
 
+require_ip() { local ip=$1; [[ $ip =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "invalid IP: $ip"; exit 1; } }
+
 readonly IP="${1:?用法: $0 <VPS-IP>}"
 readonly DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 

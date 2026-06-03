@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 # ssh_copy_id.sh — 推送本机公钥到远程 root
 set -euo pipefail
-source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
+
+require_ip() { local ip=$1; [[ $ip =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "invalid IP: $ip"; exit 1; } }
+info()   { echo "[INFO] $*"; }
+log()    { echo "[LOG]  $*"; }
 
 push_pubkey() {
     local ip="$1"
