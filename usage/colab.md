@@ -1,3 +1,4 @@
+# Tailscale 
 ```bash
 cd
 curl -fsSL https://opencode.ai/install | bash
@@ -7,47 +8,35 @@ cat ~/.ssh/id_ed25519.pub > id
 cat ~/Downloads/id >> ~/.ssh/authorized_keys
 ```
 
-
-## Tailscale 安装与启动
+## 安装
 
 ```bash
-### 安装
 curl -fsSL https://tailscale.com/install.sh | sh
 ```
 
-### 启动
+## 启动
 
-容器无 systemd，需手动启动 tailscaled，并使用 userspace-networking 模式（无 TUN 设备）：
 
 ```bash
-mkdir -p /run/tailscale /var/lib/tailscale
-tailscaled --state=/var/lib/tailscale/tailscaled.state \
-  --socket=/run/tailscale/tailscaled.sock \
-  --tun=userspace-networking \
-  --socks5-server=localhost:1080 &
-sleep 2
-tailscale --socket=/run/tailscale/tailscaled.sock up
+# 正常启动
+sudo tailscaled up --ssh
+# 容器无 TUN 设备
+sudo tailscaled --tun=userspace-networking --state=/var/lib/tailscale/tailscaled.state > /tmp/tailscaled.log 2>&1 &
 
-https://login.tailscale.com/a/13fa778e014b9e
+tailscale --socket=/run/tailscale/tailscaled.sock up --authkey="${TS_AUTHKEY}"
+# 在 <https://login.tailscale.com/admin/acls> 中将 POLICY/Tailscale SSH 策略改为：
+# `Check mode : Off`
+# ```json
+# {
+#   "action": "accept",
+#   "src": ["autogroup:member"],
+#   "dst": ["autogroup:self"],
+#   "users": ["autogroup:nonroot", "root"]
+# }
 ```
 
-### SSH 连接问题
 ```bash
-# 单次连接
-ssh -o ProxyCommand="connect -S localhost:1080 %h %p" lkf@100.75.45.53
-
-# 或写入 ~/.ssh/config 方便使用
-cat >> ~/.ssh/config << 'CONF_EOF'
-
-Host lkf-ms7d90
-    HostName 100.75.45.53
-    User lkf
-    ProxyCommand connect -S localhost:1080 %h %p
-    StrictHostKeyChecking accept-new
-CONF_EOF
-
-
-cat > AGENTS.md << EOF
+cat > ~/AGENTS.md << EOF
 ## 角色
 
 你是远程服务器
@@ -74,9 +63,5 @@ cat > AGENTS.md << EOF
 日志:tracing
 反序列:serde
 EOF
-
-
 .opencode/bin/opencode
 ```
-
-配置后直接 `ssh lkf-ms7d90` 即可。

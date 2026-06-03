@@ -38,7 +38,7 @@
 待审查代码路径/内容：
 
 ```
-/data/nutilustrader/creats/pq-view
+/data/nutilustrader/creats/common/src/config
 ```
 
 # 远程

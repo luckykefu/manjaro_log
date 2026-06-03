@@ -33,7 +33,7 @@ else
 fi
 
 # 停止已有 mihomo 进程
-sudo pkill -q mihomo 2>/dev/null || true
+sudo pkill mihomo  || true
 
 # 后台启动 mihomo
 nohup sudo mihomo -d "$(dirname "$CONFIG")" > "${CONFIG}.log" 2>&1 &

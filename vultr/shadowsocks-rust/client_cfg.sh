@@ -26,7 +26,7 @@ fetch_and_patch_config() {
     local remote_ip="$1"
     local tmpf
     tmpf=$(mktemp --suffix=.json)
-    trap 'rm -f "$tmpf"' EXIT
+    trap "rm -f '$tmpf'" EXIT
 
     scp "root@${remote_ip}:${SS_CFG}" "$tmpf"
 
@@ -60,5 +60,5 @@ require_ip "$remote_ip"
 sudo pacman -S --needed --noconfirm shadowsocks-rust jq
 fetch_and_patch_config "$remote_ip"
 setup_service
-open_port "$LOCAL_PORT" tcp
+# open_port "$LOCAL_PORT" tcp
 verify
