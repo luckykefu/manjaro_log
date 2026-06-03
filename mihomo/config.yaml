@@ -1,6 +1,6 @@
 mixed-port: 7890
 allow-lan: true
-bind-address: '*'
+bind-address: "*"
 mode: rule
 log-level: info
 external-controller: 127.0.0.1:9090
@@ -22,19 +22,19 @@ dns:
     - https://doh.pub/dns-query
     - https://dns.alidns.com/dns-query
   fake-ip-filter:
-    - '*.lan'
-    - '*.local'
-    - '*.localhost'
-    - '*.test'
+    - "*.lan"
+    - "*.local"
+    - "*.localhost"
+    - "*.test"
     - localhost.ptlogin2.qq.com
     - +.stun.*.*
     - +.stun.*.*.*
     - +.stun.*.*.*.*
     - lens.l.google.com
-    - '*.srv.nintendo.net'
+    - "*.srv.nintendo.net"
     - +.stun.playstation.net
     - xbox.*.*.microsoft.com
-    - '*.*.xboxlive.com'
+    - "*.*.xboxlive.com"
     - +.msftncsi.com
     - +.msftconnecttest.com
 proxies:
@@ -1119,10 +1119,3 @@ rules:
   - DOMAIN-KEYWORD,-cn,DIRECT
   - GEOIP,CN,DIRECT
   - MATCH,🐮牛逼
-tun:
-  enable: true
-  stack: mixed
-  dns-hijack:
-    - any:53
-  auto-route: true
-  auto-redir: true
