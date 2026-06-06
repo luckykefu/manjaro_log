@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 set -euxo pipefail
-bash <(curl -fsSL https://sing-box.app/install.sh) "${@}"
+curl -fsSL https://sing-box.app/install.sh | bash

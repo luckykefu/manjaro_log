@@ -10,7 +10,7 @@
   - `tracing`，错误日志是否携带 `Span` 上下文？是否避免在热路径中同步刷盘？
   - debug 信息丰富?
 - 性能：
-  - 不必要的 `clone()`、分配、`Arc<Mutex<T>>`
+  - 不必要的 `clone()`、分配、`Arc<Mutex<T>>`,类型转换
   - `Cow`/`&str`/`Box::leak` 等零拷贝技巧？
   - 缓存库的 TTL/容量上限？`get_with` ？
   - 迭代器/集合使用是否高效？

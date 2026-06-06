@@ -1,47 +1,29 @@
-# Tailscale 
-```bash
-cd
-curl -fsSL https://opencode.ai/install | bash
-ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519 -N ''
-cat ~/.ssh/id_ed25519.pub > id
-# 下载id
-cat ~/Downloads/id >> ~/.ssh/authorized_keys
-```
+# Tailscale
 
 ## 安装
 
 ```bash
+
+TS_AUTHKEY=tskey-auth-kLLnbWoPCV11CNTRL-GJ2u4M73hq4Cacyu84NUq4S6fHe7EQZv
+cd
+curl -fsSL https://opencode.ai/install | bash
 curl -fsSL https://tailscale.com/install.sh | sh
-```
+start(){
+    local TS_AUTHKEY=${1:?}
+    nohup sudo tailscaled --tun=userspace-networking --state=/var/lib/tailscale/tailscaled.state > /tmp/tailscaled.log 2>&1 &
+    sudo tailscale --socket=/run/tailscale/tailscaled.sock up --ssh --authkey="${TS_AUTHKEY}"
+}
+start_tun(){
+    local TS_AUTHKEY=${1:?}
+    sudo systemctl enable --now tailscaled
+    sudo tailscaled up --ssh --authkey="${TS_AUTHKEY}"
+}
+start "$TS_AUTHKEY"
 
-## 启动
-
-
-```bash
-# 正常启动
-sudo tailscaled up --ssh
-# 容器无 TUN 设备
-sudo tailscaled --tun=userspace-networking --state=/var/lib/tailscale/tailscaled.state > /tmp/tailscaled.log 2>&1 &
-
-tailscale --socket=/run/tailscale/tailscaled.sock up --authkey="${TS_AUTHKEY}"
-# 在 <https://login.tailscale.com/admin/acls> 中将 POLICY/Tailscale SSH 策略改为：
-# `Check mode : Off`
-# ```json
-# {
-#   "action": "accept",
-#   "src": ["autogroup:member"],
-#   "dst": ["autogroup:self"],
-#   "users": ["autogroup:nonroot", "root"]
-# }
-```
-
-```bash
-cat > ~/AGENTS.md << EOF
-## 角色
-
+cat > AGENTS.md << EOF
 你是远程服务器
-请用 ssh lkf@100.75.45.53 连接我的电脑(我的电脑在远程,ssh 密钥可用)
-传输文本方式: 写入本地,scp
+请用 tailscale ssh lkf@100.75.45.53 连接我的电脑,执行命令
+文本/文件传输方式: 写入本地,scp到远程,
 禁止在开发阶段使用--release
 用户所有的路径都是远程路径
 
@@ -55,13 +37,33 @@ cat > ~/AGENTS.md << EOF
 4. 目标驱动执行
    定义成功标准。循环迭代直到验证通过。
 
-## rust 开发相关:
-异步:tokio
-并行:rayon
-错误:thiserror/anyhow
-缓存:mock/fred
-日志:tracing
-反序列:serde
 EOF
+
 .opencode/bin/opencode
+```
+
+## 如何设置 Tailscale SSH 自动认证
+
+### 申请 auth key
+
+- 打开 https://login.tailscale.com/admin/settings/general
+- Keys
+- Auth keys
+- Generate auth key…
+
+### 设置允许执行命令
+
+- 打开 https://login.tailscale.com/admin/acls
+- POLICY
+- Tailscale SSH
+- Edit rule
+- Check mode : Off
+
+```json
+{
+  "action": "accept",
+  "src": ["autogroup:member"],
+  "dst": ["autogroup:self"],
+  "users": ["autogroup:nonroot", "root"]
+}
 ```

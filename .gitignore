@@ -2,7 +2,8 @@
 # **/pattern  — 匹配所有子目录
 # *.ext       — 匹配指定扩展名
 # /dir/       — 仅匹配根目录
-**/.ssh/
-**/target/
-**/WhiteSur*/
-**/.zsh/
+.ssh/
+target/
+WhiteSur*/
+.zsh/
+*.log
