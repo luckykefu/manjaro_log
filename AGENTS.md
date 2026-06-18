@@ -10,7 +10,7 @@
     - 4. 用户补充
   - 征求用户确认再执行方案
 
-## LOCAL ENV
+## ENV
 
 ```toml
 [env]
@@ -31,3 +31,16 @@ proxy=["socks5h://127.0.0.1:1080", "socks5h://127.0.0.1:7890"]
    只动必须动的地方。只清理你自己造成的混乱。
 4. 目标驱动执行
    定义成功标准。循环迭代直到验证通过。
+
+## rust代码要求
+
+- 工业级架构设计
+- rs文件DOC完整
+- 单元测试完整
+- debug详细
+- 文件职责单一性
+- 函数和文件命名可读性高
+
+## rust 开发流程
+
+需求分析 -> 解决方案 -> 方案部署 -> cargo check -> cargo test -> cargo run -p xxx --release -- -c /path/config.toml -> cargo fmt

@@ -33,12 +33,13 @@
 - 格式：
   - 代码是否符合 Rust 规范？
   - 是否已运行 `cargo fmt`？
-  - `toml`配置行后跟着注释,标注可选的其他可选值,默认值?
+  - `toml`每个字段行后跟着注释,注释格式: # 是否必须, 默认值:   ,可选参数:
+
 
 待审查代码路径/内容：
 
 ```
-/data/nutilustrader/creats/run-live
+/data/nutilustrader/creats/vbt2
 ```
 
 # 远程

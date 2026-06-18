@@ -1,18 +1,17 @@
 ```
 config
-  run_once.toml
   config.toml
 src
-  main.rs # 调用lib.rs
-  lib.rs # 调用 run_batch::run_batch()
-  load_cfg.rs # 调用 
+  main.rs # 只做入口
+  cli.rs # --config/-c 指定配置文件路径
+  lib.rs # 只做导出
   error.rs # thiserror 库
-  run_batch/
-    config.rs
+  runner/
+    config.rs # config-rs 库,从文件反序列化AppConfig, AppConfig::from_file()默认: env!("CARGO_MANIFEST_DIR")/config/config.toml
     mod.rs
-    run_batch.rs # 调用run_once::run_once()
+    runner.rs # 逻辑编排
   run_once/
-    config.rs
+    config.rs # RunOnceConfig
     mod.rs
-    run_once.rs
+    run_once.rs # 单次逻辑编排
 ```
