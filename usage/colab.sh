@@ -23,12 +23,6 @@ start(){
     fi
 }
 start "$TS_AUTHKEY"
-tee -a >> ~/.zshrc << 'EOF'
-wput() {
-  local ip=$(tailscale ip -4)
-  tailscale ssh lkf@100.75.45.53 "scp root@$ip:\"$1\" \"${2:-~/}\""
-}
-EOF
 
 cat > AGENTS.md << 'EOF'
 # 开发规范
