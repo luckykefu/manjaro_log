@@ -23,6 +23,13 @@ start(){
     fi
 }
 start "$TS_AUTHKEY"
+tee -a >> ~/.zshrc << 'EOF'
+wput() {
+  local ip=$(tailscale ip -4)
+  tailscale ssh lkf@100.75.45.53 "scp root@$ip:\"$1\" \"${2:-~/}\""
+}
+EOF
+
 cat > AGENTS.md << 'EOF'
 # 开发规范
 
@@ -34,9 +41,23 @@ cat > AGENTS.md << 'EOF'
 
 ## 远程服务器操作
 
-- 执行命令: `tailscale ssh lkf@ip` ip自己查看
-- 本地发文件: `tailscale file cp /path/to/file <目标主机名或IP>:`
-- 远程收文件: `tailscale file get <存放目录>`
+```
+remote_user=lkf
+remote_ip=100.75.45.53 # tailscale ip -4
+
+# 执行命令:
+tailscale ssh "$remote_user@$remote_ip" "cmd"
+
+# 传输文件:
+# 用法: wput "$remote_user@$remote_ip" <src> [dst]
+wput() {
+  local ip=$(tailscale ip -4)
+  local user=${USER:-root}
+  local cmd
+  printf -v cmd 'scp %s@%s:"%s" "%s"' "$user" "$ip" "$2"  "$3"
+  tailscale ssh "$1" "$cmd"
+}
+```
 
 ## 环境
 
@@ -71,9 +92,7 @@ cat > AGENTS.md << 'EOF'
 -> `cargo test -p <包名>`
 -> `cargo run -p <包名> --release -- -c /path/config.toml`
 -> `cargo fmt`
-
 EOF
-ls
 ## 启动 opencode
 .opencode/bin/opencode
 
