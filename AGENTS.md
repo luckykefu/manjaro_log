@@ -8,22 +8,19 @@
 
 ## 远程服务器操作
 
-```
-remote_user=lkf
-remote_ip=100.75.45.53 # tailscale ip -4
+
+```bash
+user=lkf
+host=100.75.45.53 # tailscale ip -4
 
 # 执行命令:
-tailscale ssh "$remote_user@$remote_ip" "cmd"
+tailscale ssh "$user@$host" "cmd"
+# 传输文件流程:
+# 本地 → 远程
+cat /path/to/src | tailscale ssh "$user@$host" "cat > /path/to/dst"
 
-# 传输文件:
-# 用法: wput "$remote_user@$remote_ip" <src> [dst]
-wput() {
-  local ip=$(tailscale ip -4)
-  local user=${USER:-root}
-  local cmd
-  printf -v cmd 'scp %s@%s:"%s" "%s"' "$user" "$ip" "$2"  "$3"
-  tailscale ssh "$1" "$cmd"
-}
+# 远程 → 本地
+tailscale ssh "$user@$host" "cat /path/to/src" > /path/to/dst
 ```
 
 ## 环境
