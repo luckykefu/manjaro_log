@@ -12,16 +12,12 @@
 ```bash
 user=lkf
 host=100.75.45.53 # tailscale ip -4
-
-# 执行命令:
-tailscale ssh "$user@$host" "cmd"
-# 传输文件流程:
-# 本地 → 远程
-cat /path/to/src | tailscale ssh "$user@$host" "cat > /path/to/dst"
-
-# 远程 → 本地
-tailscale ssh "$user@$host" "cat /path/to/src" > /path/to/dst
 ```
+- 读取文件|执行命令:`tailscale ssh "$user@$host" "cmd"`
+- 修改远程文件:
+  - 拉取到本地:`tailscale ssh "$user@$host" "cat /path/to/src" > /path/to/dst`
+  - 修改文件:
+  - 推送到远程:`cat /path/to/src | tailscale ssh "$user@$host"  "cat > /path/to/dst"`
 
 ## 环境
 
@@ -38,21 +34,15 @@ tailscale ssh "$user@$host" "cat /path/to/src" > /path/to/dst
 3. 外科手术式改动 — 只动必须动的，只清理自己造成的混乱
 4. 目标驱动执行 — 定义成功标准，循环迭代直到验证通过
 
-## Rust 代码要求
+## Rust 开发规范
 
-- 工业级架构设计
-- rs 文件 DOC 完整
-- 单元测试完整
-- debug 详细
-- 文件职责单一性
-- 函数和文件命名可读性高
-- edition = "2024"
+- `cargo run -p <包名> --release` 需要在工作空间根目录运行
 
 ## Rust 开发流程
 
 需求分析 -> 解决方案 -> 方案部署
--> `cargo clipper -p <包名>`
 -> `cargo check -p <包名>`
+-> `cargo clipper -p <包名>`
 -> `cargo test -p <包名>`
 -> `cargo run -p <包名> --release -- -c /path/config.toml`
 -> `cargo fmt`

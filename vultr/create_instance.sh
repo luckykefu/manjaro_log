@@ -30,7 +30,7 @@ create_instance() {
 
     local instance_id
     instance_id=$(curl -s "$base/instances" -H "Authorization: Bearer $VULTR_API_KEY" | jq -r '.instances[]?.id')
-    [[ "$instance_id" != "null" ]] || { echo "Creation failed:"; exit 1; }
+    [[ "$instance_id" != "null" ]] && echo "$instance_id" || { echo "Creation failed:"; exit 1; }
 
     # 轮询获取 IP
     local ip=""
@@ -47,10 +47,10 @@ create_instance() {
     echo "Instance $instance_id ready at $ip"
 
     # 从本地公钥部署（推荐方式）
-    sudo pacman -S --noconfirm --needed sshpass
+    sudo pacman -S --noconfirm --needed sshpass &> /dev/null
     ssh_copy_id "$ip" "$default_password"
     # 执行远程部署
-    ssh "root@$ip" bash -s << EOF
+    ssh "root@$ip" bash -s << 'EOF'
         set -euxo pipefail
         curl -fsSL https://opencode.ai/install | bash
         curl -fsSL https://tailscale.com/install.sh | sh
