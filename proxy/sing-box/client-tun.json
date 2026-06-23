@@ -1,0 +1,156 @@
+{
+  "log": {
+    "level": "warn"
+  },
+  "dns": {
+    "servers": [
+      {
+        "tag": "dns-remote",
+        "type": "tls",
+        "server": "8.8.8.8"
+      },
+      {
+        "tag": "dns-local",
+        "type": "udp",
+        "server": "223.5.5.5"
+      },
+      {
+        "tag": "dns-fakeip",
+        "type": "fakeip",
+        "inet4_range": "198.18.0.0/15"
+      }
+    ],
+    "rules": [
+      {
+        "rule_set": "geosite-geolocation-cn",
+        "server": "dns-local"
+      },
+      {
+        "query_type": [
+          "A",
+          "AAAA"
+        ],
+        "server": "dns-fakeip"
+      }
+    ],
+    "final": "dns-remote",
+    "strategy": "prefer_ipv4"
+  },
+  "inbounds": [
+    {
+      "type": "tun",
+      "tag": "tun-in",
+      "address": [
+        "172.19.0.1/30"
+      ],
+      "mtu": 9000,
+      "auto_route": true,
+      "auto_redirect": true,
+      "strict_route": true,
+      "route_exclude_address": [
+        "192.168.0.0/16",
+        "10.0.0.0/8",
+        "172.16.0.0/12"
+      ]
+    }
+  ],
+  "outbounds": [
+    {
+      "type": "direct",
+      "tag": "direct"
+    },
+    {
+      "type": "shadowsocks",
+      "tag": "ss-out",
+      "server": "45.32.60.113",
+      "server_port": 18388,
+      "method": "2022-blake3-aes-256-gcm",
+      "password": "RjqEoR/KS0bOnJFU1AVdL1DzbrjSk+8OCMPF9NnPni8="
+    },
+    {
+      "type": "trojan",
+      "tag": "trojan-out",
+      "server": "45.32.60.113",
+      "server_port": 8443,
+      "password": "zC3nWIa1Qp4y5qz8rgBQMw==",
+      "tls": {
+        "enabled": true,
+        "insecure": true,
+        "server_name": "sing-box"
+      }
+    },
+    {
+      "type": "hysteria2",
+      "tag": "hy2-out",
+      "server": "45.32.60.113",
+      "server_port": 8444,
+      "password": "A/saE9R/9HShlSIqsaFnrg==",
+      "up_mbps": 100,
+      "down_mbps": 500,
+      "tls": {
+        "enabled": true,
+        "insecure": true,
+        "server_name": "sing-box"
+      }
+    },
+    {
+      "type": "selector",
+      "tag": "auto",
+      "outbounds": [
+        "ss-out",
+        "trojan-out",
+        "hy2-out"
+      ],
+      "default": "ss-out"
+    },
+    {
+      "type": "urltest",
+      "tag": "best",
+      "outbounds": [
+        "ss-out",
+        "trojan-out",
+        "hy2-out"
+      ],
+      "url": "https://www.gstatic.com/generate_204",
+      "interval": "5m",
+      "tolerance": 50
+    }
+  ],
+  "route": {
+    "rules": [
+      {
+        "ip_is_private": true,
+        "outbound": "direct"
+      },
+      {
+        "rule_set": "geosite-geolocation-cn",
+        "outbound": "direct"
+      },
+      {
+        "action": "sniff"
+      },
+      {
+        "protocol": "dns",
+        "action": "hijack-dns"
+      }
+    ],
+    "rule_set": [
+      {
+        "tag": "geosite-geolocation-cn",
+        "type": "local",
+        "format": "binary",
+        "path": "/data/.manjaro/proxy/sing-box/rule-set/geosite-geolocation-cn.srs"
+      }
+    ],
+    "final": "auto",
+    "auto_detect_interface": true,
+    "default_domain_resolver": "dns-local"
+  },
+  "experimental": {
+    "cache_file": {
+      "enabled": true,
+      "store_fakeip": true,
+      "store_rdrc": true
+    }
+  }
+}

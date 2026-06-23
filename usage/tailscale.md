@@ -8,7 +8,6 @@
 usage/tailscale.sh
 ```
 
-
 ## API 删除设备
 
 1. https://login.tailscale.com/admin/settings/keys → 生成 API Key
@@ -49,12 +48,3 @@ curl -s "https://api.tailscale.com/api/v2/tailnet/$TAILNET/devices" \
       done
     done
 ```
-
-5. 最安全的方式（推荐）：https://login.tailscale.com → Machines → 手动勾选删除
-
-## 常见问题
-
-- 跨运营商 / 对称 NAT 连接慢：可自建 DERP 中继服务器
-- 与代理共存：`tailscale0` 虚拟网卡，互不影响
-- 无需公网 IP、无需端口转发，自动 NAT 穿透
-- 离线设备仍在 tailnet 中，需手动删除

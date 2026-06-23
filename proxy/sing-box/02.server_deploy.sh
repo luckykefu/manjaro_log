@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# 远程 VPS 端：安装 sing-box，生成三协议服务端配置，下载 rule-set
+# VPS 端：安装 sing-box，按协议参数生成服务端配置
+# Usage: $0 [ss|trojan|hy2|all]  默认 all
 set -euo pipefail
 
 readonly CFG=/etc/sing-box/config.json
@@ -15,18 +16,15 @@ gen_cert() {
 }
 
 gen_config() {
+    local protocol="${1:-all}"
     gen_cert
-    echo "生成服务端配置（SS + Trojan + Hysteria2）"
+    echo "生成服务端配置（protocol: $protocol）"
 
-    local ss_pass tj_pass hy2_pass
-    ss_pass=$(sing-box generate rand 32 --base64)
-    tj_pass=$(sing-box generate rand 16 --base64)
-    hy2_pass=$(sing-box generate rand 16 --base64)
+    local ss_pass tj_pass hy2_pass ss_block tj_block hy2_block
 
-    sudo tee "$CFG" > /dev/null << EOF
-{
-  "log": { "level": "info" },
-  "inbounds": [
+    if [[ "$protocol" == "ss" || "$protocol" == "all" ]]; then
+        ss_pass=$(sing-box generate rand 32 --base64)
+        ss_block=$(cat <<-EOF
     {
       "type": "shadowsocks",
       "tag": "ss-in",
@@ -35,6 +33,13 @@ gen_config() {
       "method": "2022-blake3-aes-256-gcm",
       "password": "$ss_pass"
     },
+EOF
+)
+    fi
+
+    if [[ "$protocol" == "trojan" || "$protocol" == "all" ]]; then
+        tj_pass=$(sing-box generate rand 16 --base64)
+        tj_block=$(cat <<-EOF
     {
       "type": "trojan",
       "tag": "trojan-in",
@@ -48,6 +53,13 @@ gen_config() {
         "key_path": "/etc/sing-box/key.pem"
       }
     },
+EOF
+)
+    fi
+
+    if [[ "$protocol" == "hy2" || "$protocol" == "all" ]]; then
+        hy2_pass=$(sing-box generate rand 16 --base64)
+        hy2_block=$(cat <<-EOF
     {
       "type": "hysteria2",
       "tag": "hy2-in",
@@ -62,16 +74,30 @@ gen_config() {
         "certificate_path": "/etc/sing-box/cert.pem",
         "key_path": "/etc/sing-box/key.pem"
       }
-    }
+    },
+EOF
+)
+    fi
+
+    # 拼接 inbounds
+    local inbounds_json="${ss_block}${tj_block}${hy2_block}"
+    inbounds_json="${inbounds_json%,}"  # 去掉末尾逗号
+
+    sudo tee "$CFG" > /dev/null << EOF
+{
+  "log": { "level": "info" },
+  "inbounds": [
+$inbounds_json
   ],
   "outbounds": [
     { "type": "direct", "tag": "direct" }
   ]
 }
 EOF
-    echo "SS   密码: $ss_pass"
-    echo "Trojan 密码: $tj_pass"
-    echo "HY2  密码: $hy2_pass"
+
+    [[ -n "$ss_pass" ]]   && echo "SS   密码: $ss_pass"
+    [[ -n "$tj_pass" ]]   && echo "Trojan 密码: $tj_pass"
+    [[ -n "$hy2_pass" ]]  && echo "HY2  密码: $hy2_pass"
 }
 
 dl_ruleset() {
@@ -110,13 +136,25 @@ verify() {
     done
 }
 
-if ! command -v sing-box &>/dev/null; then
-    bash <(curl -fsSL https://sing-box.app/install.sh)
-fi
+main() {
+    local protocol="${1:-all}"
+    case "$protocol" in
+        ss|trojan|hy2|all) ;;
+        *) echo "Usage: $0 [ss|trojan|hy2|all]"; exit 1 ;;
+    esac
 
-gen_config
-dl_ruleset
-open_port 18388 tcp; open_port 18388 udp
-open_port 8443  tcp
-open_port 8444  tcp; open_port 8444 udp
-verify
+    if ! command -v sing-box &>/dev/null; then
+        bash <(curl -fsSL https://sing-box.app/install.sh)
+    fi
+
+    gen_config "$protocol"
+    dl_ruleset
+
+    [[ "$protocol" == "ss" || "$protocol" == "all" ]]     && { open_port 18388 tcp; open_port 18388 udp; }
+    [[ "$protocol" == "trojan" || "$protocol" == "all" ]] && open_port 8443 tcp
+    [[ "$protocol" == "hy2" || "$protocol" == "all" ]]    && { open_port 8444 tcp; open_port 8444 udp; }
+
+    verify
+}
+
+main "$@"

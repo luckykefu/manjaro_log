@@ -1,9 +1,23 @@
 #!/bin/bash
+# sing-box 启停管理，支持按协议路由
+# Usage: $0 {start|stop|restart|status} [ss|trojan|hy2|all|config_path]
 set -u
-CFG=$(realpath -q "${2:-/etc/sing-box/config.json}" 2>/dev/null || echo "${2:-/etc/sing-box/config.json}")
+SCRIPT_DIR="$(cd "$(dirname "$(realpath "$0")")" && pwd)"
+CMD=${1:-start}
+
+resolve_cfg() {
+    local arg="${1:-}"
+    [[ -z "$arg" ]] && { echo "/etc/sing-box/config.json"; return; }
+    [[ -f "$arg" ]] && { realpath -q "$arg" 2>/dev/null || echo "$arg"; return; }
+    case "$arg" in
+        ss|trojan|hy2|all|tun) echo "$SCRIPT_DIR/client-${arg}.json" ;;
+        *)                 echo "$arg" ;;
+    esac
+}
+
+CFG=$(resolve_cfg "${2:-}")
 LOG=/var/log/sing-box.log
 PIDFILE=/tmp/sing-box.pid
-CMD=${1:-start}
 
 SUDO=""
 [[ $EUID -ne 0 ]] && SUDO=sudo
@@ -25,8 +39,10 @@ start() {
         echo "Config not found: $CFG" >&2
         exit 1
     fi
-    $SUDO touch "$LOG" 2>/dev/null || true
-    $SUDO nohup sing-box run -c "$CFG" > "$LOG" 2>&1 &
+    $SUDO touch "$LOG" 2>/dev/null || $SUDO touch /tmp/sing-box.log
+    LOGFILE=$LOG
+    [[ ! -w "$LOGFILE" ]] && LOGFILE=/tmp/sing-box.log
+    $SUDO nohup sing-box run -c "$CFG" > "$LOGFILE" 2>&1 &
     local spid=$!
     echo "$spid" | $SUDO tee "$PIDFILE" > /dev/null
 
@@ -58,7 +74,7 @@ start() {
         $SUDO rm -f "$PIDFILE"
         exit 1
     fi
-    echo "Started (pid $spid)"
+    echo "Started (pid $spid, config: $CFG)"
     local mixed_port
     mixed_port=$($SUDO jq -r '.inbounds[] | select(.type == "mixed" and (.listen // "127.0.0.1" | test("^127\\.|^localhost$"))) | .listen_port // 1080' "$CFG" 2>/dev/null | head -1)
     if [[ -n "$mixed_port" ]]; then
@@ -102,5 +118,5 @@ case "$CMD" in
     stop)    stop    ;;
     restart) stop; sleep 1; start ;;
     status)  status  ;;
-    *)       echo "Usage: $0 {start|stop|restart|status} [config]" >&2; exit 1 ;;
+    *)       echo "Usage: $0 {start|stop|restart|status} [ss|trojan|hy2|all|config_path]" >&2; exit 1 ;;
 esac
