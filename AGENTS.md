@@ -6,18 +6,37 @@
 - 解决方案: 给出可选方案及权衡
 - 征求用户确认再执行方案
 
-## 远程服务器操作
+## 远程服务器操作 — 本机 → Colab
 
+```bash
+# 方式 A（稳定 — tailscale SSH）：
+colab_ip=$(colab exec -s "$colab_session" <<< $'%%bash\ntailscale ip -4' 2>/dev/null \
+  | grep -Eo '([0-9]{1,3}\.){3}[0-9]{1,3}')
+ssh root@"$colab_ip"
+
+# 方式 B（备用）：colab exec
+colab exec -s "$colab_session" <<< $'%%bash\ncmd'
+bash usage/colab-shell.sh "$colab_session" cmd
+bash usage/colab-shell.sh "$colab_session"  # 交互模式
+```
+- 读取文件|执行命令: `ssh root@"$colab_ip" "cmd"`
+- 拉取文件: `ssh root@"$colab_ip" "cat /path/to/src" > /path/to/dst`
+- 推送文件: `cat /path/to/src | ssh root@"$colab_ip" "cat > /path/to/dst"`
+- 读取文件（备用）: `colab exec -s "$colab_session" <<< $'%%bash\ncat /path/to/src' > /path/to/dst`
+- 拉取文件（备用）: `colab exec -s "$colab_session" <<< $'%%bash\nbase64 /path/to/src' | base64 -d > /path/to/dst`
+- 推送文件（备用）: `base64 /path/to/src | colab exec -s "$colab_session" <<< $'%%bash\nbase64 -d > /path/to/dst'`
+
+## 远程服务器操作 — Colab → 本机
 
 ```bash
 user=lkf
-host=100.75.45.53 # tailscale ip -4
+host=100.75.45.52 # 本机 tailscale IP
 ```
-- 读取文件|执行命令:`tailscale ssh "$user@$host" "cmd"`
+- 读取文件|执行命令: `tailscale ssh "$user@$host" "cmd"`
 - 修改远程文件:
-  - 拉取到本地:`tailscale ssh "$user@$host" "cat /path/to/src" > /path/to/dst`
+  - 拉取到本地: `tailscale ssh "$user@$host" "cat /path/to/src" > /path/to/dst`
   - 修改文件:
-  - 推送到远程:`cat /path/to/src | tailscale ssh "$user@$host"  "cat > /path/to/dst"`
+  - 推送到远程: `cat /path/to/src | tailscale ssh "$user@$host" "cat > /path/to/dst"`
 
 ## 环境
 

@@ -54,7 +54,7 @@ start() {
     # ── Phase 1: 配置预处理 ──
 
     if [[ $tun = true ]]; then
-        yq -iy '.tun = {"enable": true, "stack": "mixed", "dns-hijack": ["any:53"], "auto-route": true, "auto-redirect": true, "auto-detect-interface": true}' "$CONFIG"
+        yq -iy '.tun = {"enable": true, "stack": "mixed", "dns-hijack": ["any:53"], "auto-route": true, "auto-redirect": true, "auto-detect-interface": true, "exclude-interface": ["tailscale0"], "include-uid": [1000]}' "$CONFIG"
         echo "TUN 已启用"
     else
         yq -iy '.tun.enable = false' "$CONFIG"
