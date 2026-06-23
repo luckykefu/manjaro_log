@@ -26,6 +26,7 @@ start_userspace() {
         > /tmp/tailscaled.log 2>&1 &
     sleep 2
     sudo tailscale --socket=/run/tailscale/tailscaled.sock up \
+        --accept-routes --accept-dns=false \
         --ssh --authkey="${TS_AUTHKEY}"
 }
 

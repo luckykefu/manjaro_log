@@ -25,9 +25,9 @@ gcloud config set project nutilustrader
 gcloud auth application-default set-quota-project nutilustrader
 gcloud services enable storage.googleapis.com --project nutilustrader
 
+
 mysession=colab-mysession
 colab new -s "$mysession"
-
 colab exec -s "$mysession" -f usage/tailscale.sh
 colab exec -s "$mysession" <<'EOF'
 %%bash
@@ -40,13 +40,13 @@ colab ls -s "$mysession" /root
 colab_ip=$(colab exec -s "$mysession" <<< $'%%bash\ntailscale ip -4' 2>/dev/null \
   | grep -Eo '([0-9]{1,3}\.){3}[0-9]{1,3}')
 ssh root@"$colab_ip"
-# ~/.opencode/bin/opencode
+~/.opencode/bin/opencode
 
-colab stop -s "$mysession"
+
 
 
 colab status
 colab console -s "$mysession"      # 远程 shell（注意：有卡死 bug，不推荐）
-
+colab stop -s "$mysession"
 # 一键执行（创建 → 运行 → 释放）
 colab run --gpu T4 train.py

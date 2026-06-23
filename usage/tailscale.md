@@ -11,40 +11,15 @@ usage/tailscale.sh
 ## API 删除设备
 
 1. https://login.tailscale.com/admin/settings/keys → 生成 API Key
-2. 查询所有设备：
 
 ```bash
-export TS_KEY="tskey-api-xxxxx"
-export TAILNET="your-tailnet"
+# 4. 安全删除离线设备（本机确认 + API 匹配）：
 
-curl -s "https://api.tailscale.com/api/v2/tailnet/$TAILNET/devices" \
-  -u "$TS_KEY:" | jq '.devices[] | {id, name, lastSeen}'
-```
+export TS_KEY="tskey-api-k2E6p4F5Tq11CNTRL-dYbwk2MzTG61GdEBgy7dF66ZovBqRbb9U"
+export TAILNET="kefu1820@gmail.com"
+curl -s -u "$TS_KEY:" "https://api.tailscale.com/api/v2/tailnet/-/devices" | \
+  jq -r '.devices[] | select(.connectedToControl == false) | .id' | \
+  xargs -I{} sh -c 'echo "删除 {}"; curl -s -X DELETE -u "$TS_KEY:" -o /dev/null "https://api.tailscale.com/api/v2/device/{}"'
 
-> ⚠️ 公开 API 的 `online` 字段永远为 `null`，无法判断在线/离线。
-
-3. 删除指定设备：
-
-```bash
-curl -X DELETE "https://api.tailscale.com/api/v2/device/{deviceID}" \
-  -u "$TS_KEY:"
-```
-
-4. 安全删除离线设备（本机确认 + API 匹配）：
-
-```bash
-# 1. 本机获取离线设备名（.Online 真实可靠）
-offline=$(tailscale status --json | jq -r '[.Peer[] | select(.Online == false) | .DNSName | rtrimstr(".")] | .[]')
-
-# 2. API 按名称匹配后删除
-curl -s "https://api.tailscale.com/api/v2/tailnet/$TAILNET/devices" \
-  -u "$TS_KEY:" | jq -r '.devices[] | "\(.id) \(.name)"' \
-  | while read id name; do
-      for off in $offline; do
-        if [[ $name == "$off" ]]; then
-          echo "Deleting $name ($id)"
-          curl -X DELETE "https://api.tailscale.com/api/v2/device/$id" -u "$TS_KEY:"
-        fi
-      done
-    done
+offline=$(tailscale status --json | jq -r '[.Peer[] | select(.Online == false) | .DNSName | rtrimstr(".")] | .[]') && echo $offline
 ```
