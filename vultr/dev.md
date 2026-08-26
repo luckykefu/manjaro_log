@@ -1,56 +1,82 @@
+# 查询实例
+
+无参数。输出格式: `[id] label | os | ip | status | ram | vCPU`
+
+```bash
+vultr_list_instances() {
+    curl -s "https://api.vultr.com/v2/instances" \
+        -H "Authorization: Bearer $VULTR_API_KEY" \
+        | jq -r '.instances[] | "[\(.id)] \(.label // .hostname) | \(.os) | \(.main_ip) | \(.status) | \(.ram/1024)GB | \(.vcpu_count)vCPU"'
+}
+```
+
 # 创建实例
 
-```bash
-    : "${VULTR_API_KEY:?}" "${TS_AUTHKEY:?}"
-    local base="${API_BASE_URL:-https://api.vultr.com/v2}"
-    local region="${1:-sgp}" plan="${2:-vc2-1c-1gb}" os_id="${3:-535}"
+| 参数 | 默认值 | 说明 |
+|------|--------|------|
+| $1 region | nrt | 区域: nrt(东京), sgp(新加坡), ewr(新泽西) |
+| $2 plan | vc2-1c-1gb | 套餐: vc2-1c-1gb(1vCPU/1GB), vc2-1c-2gb 等 |
+| $3 os_id | 535 | 系统 ID: 535(Arch Linux), 164(Ubuntu 22.04) |
 
-    local default_password
-    default_password=$(curl "$base/instances" -X POST \
+输出创建实例的默认密码。
+
+```bash
+vultr_create_instance() {
+    local region="${1:-nrt}"
+    local plan="${2:-vc2-1c-1gb}"
+    local os_id="${3:-535}"
+
+    curl -s "https://api.vultr.com/v2/instances" \
+        -X POST \
         -H "Authorization: Bearer $VULTR_API_KEY" \
         -H "Content-Type: application/json" \
-        -d "$(jq -n --arg r "$region" --arg p "$plan" --argjson o "$os_id" '{region:$r,plan:$p,os_id:$o,backups:"disabled"}')" | jq -r '.instance.default_password')  && echo "$default_password"
+        -d "$(jq -n \
+            --arg r "$region" \
+            --arg p "$plan" \
+            --argjson o "$os_id" \
+            '{region:$r, plan:$p, os_id:$o, backups:"disabled"}')" \
+        | jq -r '.instance.default_password'
+}
 ```
 
-# 获取 ip
+# 推送ssh密钥到实例
+
+| 参数 | 必填 | 说明 |
+|------|------|------|
+| $1 instance_id | 是 | 实例 ID |
+| $2 password | 是 | 实例密码 |
+
+依赖: `sshpass` (`pacman -S sshpass`)
 
 ```bash
-    local ip=""
-    for i in {1..30}; do
-        sleep 3
-        ip=$(curl -s "$base/instances/$instance_id" -H "Authorization: Bearer $VULTR_API_KEY" \
-            | jq -r '.instance.main_ip // empty')
-        [[ -n "$ip" && "$ip" != "0.0.0.0" ]] && echo "$ip" && break
-        echo "Waiting for IP... ($i/30)"
-    done
+vultr_push_sshkey() {
+    local instance_id="${1:?需要 instance_id}"
+    local password="${2:?需要 password}"
+
+    local ip
+    ip=$(curl -s "https://api.vultr.com/v2/instances/$instance_id" \
+        -H "Authorization: Bearer $VULTR_API_KEY" \
+        | jq -r '.instance.main_ip')
+
+    local pubkey
+    pubkey=$(cat ~/.ssh/id_ed25519.pub)
+    sshpass -p "$password" ssh -o StrictHostKeyChecking=no root@"$ip" \
+        "mkdir -p ~/.ssh && echo '$pubkey' >> ~/.ssh/authorized_keys && chmod 700 ~/.ssh && chmod 600 ~/.ssh/authorized_keys"
+}
 ```
 
-# 部署 vpn
+# 销毁实例
 
-## 推送ssh密钥到远程
-
-```bash
-    # 从本地公钥部署（推荐方式）
-    sudo pacman -S --noconfirm --needed sshpass &> /dev/null
-    ssh_copy_id "$ip" "$default_password"
-```
-
-## 部署 shadowsocks server
+| 参数 | 必填 | 说明 |
+|------|------|------|
+| $1 instance_id | 是 | 实例 ID |
 
 ```bash
-proxy/shadowsocks-rust/deploy_server.sh "$ip"
-```
+vultr_delete_instance() {
+    local instance_id="${1:?需要 instance_id}"
 
-## 本地配置 shadowsocks client
-
-```bash
-proxy/shadowsocks-rust/client_cfg.sh "$ip"
-```
-
-# 获取 instance_id
-
-```bash
-    local instance_id
-    instance_id=$(curl -s "$base/instances" -H "Authorization: Bearer $VULTR_API_KEY" | jq -r '.instances[]?.id')
-    [[ "$instance_id" != "null" ]] && echo "$instance_id" || { echo "Creation failed:"; exit 1; }
+    curl -s "https://api.vultr.com/v2/instances/$instance_id" \
+        -X DELETE \
+        -H "Authorization: Bearer $VULTR_API_KEY"
+}
 ```
