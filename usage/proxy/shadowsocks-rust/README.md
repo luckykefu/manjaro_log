@@ -2,15 +2,15 @@
 
 ## 脚本说明
 
-| 脚本 | 用途 | 用法 |
-|------|------|------|
-| `server.sh` | VPS端: 安装SS + 生成配置 + 启动服务 | 在VPS上执行 |
-| `deploy_server.sh` | 推送server.sh到VPS并执行 | `deploy_server.sh <ip>` |
-| `deploy_vps.sh` | 一键部署: 服务端 + 客户端 + 验证 | `deploy_vps.sh <ip>` |
-| `client_cfg.sh` | 本地: 拉取配置 + 启动客户端 | `client_cfg.sh <ip>` |
-| `ss_to_mihomo.sh` | SS配置转mihomo格式 | `ss_to_mihomo.sh <ip>` |
-| `deploy_colab.sh` | 部署到Google Colab | `deploy_colab.sh <session>` |
-| `shadowsocks_colab.sh` | Colab端服务脚本 | Colab内执行 |
+| 脚本                   | 用途                                | 用法                        |
+| ---------------------- | ----------------------------------- | --------------------------- |
+| `server.sh`            | VPS端: 安装SS + 生成配置 + 启动服务 | 在VPS上执行                 |
+| `deploy_server.sh`     | 推送server.sh到VPS并执行            | `deploy_server.sh <ip>`     |
+| `deploy_vps.sh`        | 一键部署: 服务端 + 客户端 + 验证    | `deploy_vps.sh <ip>`        |
+| `client_cfg.sh`        | 本地: 拉取配置 + 启动客户端         | `client_cfg.sh <ip>`        |
+| `ss_to_mihomo.sh`      | SS配置转mihomo格式                  | `ss_to_mihomo.sh <ip>`      |
+| `deploy_colab.sh`      | 部署到Google Colab                  | `deploy_colab.sh <session>` |
+| `shadowsocks_colab.sh` | Colab端服务脚本                     | Colab内执行                 |
 
 ## 快速开始
 

@@ -1,4 +1,5 @@
 ## memos
+
 ```python
 !docker run -d \
   --name memos \
@@ -9,6 +10,7 @@
 ```
 
 ## openwebui
+
 ```python
 
 # file:///data/.manjaro/manjaro_usage/s/openwebui.ipynb
@@ -16,6 +18,7 @@
 ```
 
 ## whisper
+
 ```python
 %%bash
 # "file:///data/.manjaro/manjaro_usage/s/whisper.ipynb"
@@ -24,6 +27,7 @@ bash find_and_run.sh . create_ipynb.sh "s" "whisper"
 ```
 
 ## TikTokDownloader
+
 ```python
 %%bash
 # "file:///data/.manjaro/manjaro_usage/s/TikTokDownloader.ipynb"
@@ -32,6 +36,7 @@ bash find_and_run.sh . create_ipynb.sh "s" "TikTokDownloader"
 ```
 
 ## ComfyUI Study Log
+
 ```python
 %%bash
 # file:///data/projects/ComfyUIStudyLog/ComfyUIStudyLog.ipynb
@@ -40,10 +45,10 @@ bash find_and_run.sh . create_ipynb.sh "/data/projects/ComfyUIStudyLog" "ComfyUI
 ```
 
 # amazonq
+
 ```python
 %%bash
 # "file:///data/.manjaro/manjaro_usage/s/amazonq.ipynb"
 bash find_and_run.sh . create_ipynb.sh "s" "amazonq"
 
 ```
-

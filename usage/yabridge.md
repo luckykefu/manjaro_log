@@ -1,6 +1,5 @@
 ### install
 
-
 ```bash
 %%bash
 sudo pacman -Sy --needed --noconfirm yabridge yabridgectl wine wine-gecko wine-mono winetricks
@@ -8,9 +7,7 @@ sudo pacman -Sy --needed --noconfirm yabridge yabridgectl wine wine-gecko wine-m
 
 ### vst
 
-
 #### 虚拟桌面组
-
 
 ```bash
 %%bash
@@ -34,7 +31,6 @@ WINEPREFIX="$t" winetricks dxvk mfc42
 #### BABY Audio
 
 虚拟桌面组
-
 
 ```bash
 %%bash
@@ -81,11 +77,9 @@ cp -rf "$d"/* "$t"
 | BBE Sound  | Two Timer.vst3          | 双延迟效果器     |
 | BBE Sound  | Green Screamer.vst3     | 过载效果器       |
 
-
 #### dadalife
 
 虚拟桌面组+dxvk 组
-
 
 ```bash
 %%bash
@@ -99,7 +93,6 @@ WINEPREFIX="$t" wine "$e"
 #### fabfilter
 
 虚拟桌面 组
-
 
 ```bash
 %%bash
@@ -116,7 +109,6 @@ WINEPREFIX="$t" wine "$c"
 #### Harman Audio
 
 虚拟桌面 + mfc42 组
-
 
 ```bash
 %%bash
@@ -141,7 +133,6 @@ WINEPREFIX="$w" wine "$e"
 | Lexicon  | LexDualDelay.dll       | 双延迟         |
 | Lexicon  | LexChorus.dll          | 合唱效果器     |
 
-
 ```bash
 %%bash
 e=$(find /data/vst -type f -name "Setup PCM Native Effects v1.2.6.exe")
@@ -154,7 +145,6 @@ WINEPREFIX="$w" wine "$e"
 #### ikmultimedia
 
 虚拟桌面组
-
 
 ```bash
 %%bash
@@ -172,7 +162,6 @@ echo "$c" && WINEPREFIX="$t" wine "$c"
 
 虚拟桌面组
 
-
 ```bash
 %%bash
 d="/data/vst/Oeksound/C"
@@ -183,7 +172,6 @@ cp -rf "$d"/* "$t"
 #### slatedigital
 
 虚拟桌面组
-
 
 ```bash
 %%bash
@@ -205,7 +193,6 @@ WINEPREFIX="$t" wine "$e"
 
 虚拟桌面组
 
-
 ```bash
 %%bash
 ## Solid State Logic
@@ -220,7 +207,6 @@ cp -r "$d/C"/* "$t"
 
 虚拟桌面组
 
-
 ```bash
 %%bash
 e=$(find /data/vst -type f -name "Sonible full bundle 2023.3 CE.exe")
@@ -233,7 +219,6 @@ WINEPREFIX="$t" wine "$e"
 
 虚拟桌面组
 
-
 ```bash
 %%bash
 e=$(find /data/vst -type f -name "ValhallaDSP bundle 2024.3 CE.exe")
@@ -243,7 +228,6 @@ WINEPREFIX="$t" wine "$e"
 ```
 
 #### wavesfactory
-
 
 ```bash
 %%bash
@@ -265,9 +249,7 @@ WINEPREFIX="$t" wine "$e"
 
 ### ERROR
 
-
 #### 插件界面可见且有声音，但鼠标点击位置偏移或完全无效
-
 
 ```python
 ## 打开终端，输入 winecfg。
@@ -278,7 +260,6 @@ WINEPREFIX="$t" wine "$e"
 ```
 
 #### 安装失败
-
 
 ```python
 winetricks mfc42

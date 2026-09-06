@@ -1,9 +1,8 @@
 ```bash
-sudo pacman -S --noconfirm --needed wine wine-mono wine-gecko winetricks 
+sudo pacman -S --noconfirm --needed wine wine-mono wine-gecko winetricks
 ```
 
 #### aliyunpan
-
 
 ```bash
 %%bash
@@ -16,7 +15,6 @@ source "$f"
 ```
 
 #### xstudio
-
 
 ```bash
 %%bash
@@ -31,7 +29,6 @@ install_to_wine XStudio
 
 #### 三国谋定天下
 
-
 ```bash
 w=/data/.wine/sgmdtx
 exe=$HOME/Downloads/NSLG_Setup_202607131602.exe
@@ -42,7 +39,6 @@ WINEPREFIX=$w wine "/data/.wine/sgmdtx/drive_c/Program Files/bilibili Game/NSLG/
 ```
 
 #### 微信
-
 
 ```bash
 %%bash
@@ -56,7 +52,6 @@ install_to_wine wechat vcrun2019 cjkfonts
 ```
 
 ## 安装 yabridge
-
 
 ```bash
 %%bash

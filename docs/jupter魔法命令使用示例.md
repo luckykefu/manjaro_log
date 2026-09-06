@@ -8,6 +8,7 @@
 - **单元格魔法命令**: 以两个 `%%` 开头，作用于整个单元格。
 
 使用 `%lsmagic` 可以查看所有可用的魔法命令。
+
 ```python
 # 查看所有可用的魔法命令
 %lsmagic
@@ -15,9 +16,11 @@
 ```
 
 ## 1. 代码执行与性能分析
+
 ### `%time`
 
 执行一行代码，并报告其总执行时间。
+
 ```python
 # 计算一个列表推导式的执行时间
 %time result = [i**2 for i in range(1000000)]
@@ -27,6 +30,7 @@
 ### `%%time`
 
 执行整个单元格的代码，并报告其总执行时间。
+
 ```python
 %%time
 import numpy as np
@@ -41,6 +45,7 @@ c = np.dot(a, b)
 ### `%timeit`
 
 多次执行一行代码以获得更精确的平均执行时间。它会自动选择最佳运行次数。
+
 ```python
 # 多次执行列表推导式，计算平均时间
 %timeit [i**2 for i in range(1000)]
@@ -50,6 +55,7 @@ c = np.dot(a, b)
 ### `%%timeit`
 
 多次执行整个单元格的代码以获得更精确的平均执行时间。
+
 ```python
 %%timeit
 # 定义一个简单的函数
@@ -66,6 +72,7 @@ for i in range(100):
 ### `%prun`
 
 使用 Python 的性能分析器 `cProfile` 来执行代码，并显示每个函数的调用次数和耗时。
+
 ```python
 # 定义一些函数
 def func_a():
@@ -86,6 +93,7 @@ def main():
 ### `%run`
 
 执行一个外部的 Python 脚本。脚本中定义的变量和函数可以在当前的 Notebook 会话中使用。
+
 ```python
 # 首先，使用 %%writefile 创建一个名为 my_script.py 的文件
 %%writefile my_script.py
@@ -119,9 +127,11 @@ greet("Jupyter User")
 ```
 
 ## 2. 环境与信息查询
+
 ### `%pwd`
 
 返回当前工作目录。
+
 ```python
 # 打印当前工作目录
 %pwd
@@ -131,6 +141,7 @@ greet("Jupyter User")
 ### `%ls` 或 `!ls` (on Unix/macOS) / `!dir` (on Windows)
 
 列出当前目录下的文件和文件夹。`%ls` 是魔法命令，`!` 前缀允许你执行 shell 命令。
+
 ```python
 # 列出当前目录下的文件
 %ls
@@ -140,6 +151,7 @@ greet("Jupyter User")
 ### `%who` / `%whos`
 
 列出当前交互式命名空间中定义的所有变量。`%whos` 提供更详细的信息（类型、大小等）。
+
 ```python
 # 定义一些不同类型的变量
 a_string = "hello"
@@ -165,6 +177,7 @@ an_array = np.array([4, 5, 6])
 ### `%reset` / `%reset -f`
 
 清除当前命名空间中定义的所有变量和名称。`-f` 选项表示强制执行，无需确认。
+
 ```python
 # 在重置前查看变量
 %whos
@@ -186,6 +199,7 @@ an_array = np.array([4, 5, 6])
 ### `%pinfo` / `?`
 
 显示对象的详细信息（即 `obj.__doc__` 的内容）。`?` 是 `%pinfo` 的快捷方式。
+
 ```python
 # 使用 %pinfo 查看 len 函数的帮助信息
 %pinfo len
@@ -201,6 +215,7 @@ list?
 ### `%pinfo2` / `??`
 
 显示对象的更详细的源代码信息（如果可用）。`??` 是 `%pinfo2` 的快捷方式。
+
 ```python
 # 使用 ?? 查看 numpy.arange 函数的源代码
 import numpy as np
@@ -211,6 +226,7 @@ np.arange??
 ### `%history`
 
 显示之前执行过的命令历史。
+
 ```python
 # 显示最近3条输入历史
 %history -n 3
@@ -218,17 +234,20 @@ np.arange??
 ```
 
 ## 3. 开发与调试
+
 ### `%load`
 
 将一个脚本、文件或 URL 的内容加载到当前单元格中。
+
 ```python
-# %load 
+# %load
 
 ```
 
 ### `%%writefile`
 
 将整个单元格的内容写入到一个文件中。
+
 ```python
 %%writefile new_module.py
 def multiply(x, y):
@@ -243,6 +262,7 @@ if __name__ == '__main__':
 ### `%debug`
 
 如果在代码执行后发生异常，可以在一个新的单元格中输入 `%debug` 来进入一个交互式调试器，可以检查堆栈和变量的值。
+
 ```python
 # 故意制造一个错误
 def cause_error(x):
@@ -265,6 +285,7 @@ cause_error(10)
 ### `%load_ext`
 
 加载一个 IPython 扩展。一个非常有用的扩展是 `autoreload`。
+
 ```python
 # 加载 autoreload 扩展
 %load_ext autoreload
@@ -294,9 +315,11 @@ new_module.multiply(5, 10)
 ```
 
 ## 4. Shell 命令与系统交互
+
 ### `!` (Shell 命令前缀)
 
 在行首使用 `!` 可以执行任何 shell 命令。
+
 ```python
 # 在 Unix/Linux/macOS 上使用 echo
 !echo "Hello from the shell!"
@@ -319,6 +342,7 @@ message = "This is a variable from Python."
 ### `%%bash` / `%%script`
 
 将整个单元格的内容作为 bash 脚本（或其他指定的脚本）执行。
+
 ```python
 %%bash
 echo "Running a multi-line bash script."
@@ -332,6 +356,7 @@ done
 ### `%cd`
 
 更改当前工作目录。
+
 ```python
 # 查看当前目录
 print(f"Current directory: %pwd")
@@ -364,9 +389,11 @@ print(f"Current directory: %pwd")
 ```
 
 ## 5. 富媒体与可视化
+
 ### `%matplotlib`
 
 配置 matplotlib 的集成方式。最常用的选项是 `inline`，它将图表直接嵌入到 Notebook 中。
+
 ```python
 # 设置 matplotlib 为 inline 模式
 %matplotlib inline
@@ -388,6 +415,7 @@ plt.show()
 ### `%%html`
 
 将整个单元格的内容渲染为 HTML。
+
 ```python
 %%html
 <div style="border: 2px solid blue; padding: 10px;">
@@ -401,6 +429,7 @@ plt.show()
 ### `%%svg`
 
 将整个单元格的内容渲染为 SVG 图像。
+
 ```python
 %%svg
 <svg height="100" width="100">
@@ -413,6 +442,7 @@ plt.show()
 ### `%%latex`
 
 将整个单元格的内容使用 LaTeX 渲染。这对于显示数学公式非常有用。
+
 ```python
 %%latex
 \begin{align}
@@ -425,9 +455,11 @@ plt.show()
 ```
 
 ## 6. 其他有用的魔法命令
+
 ### `%pip` / `%conda`
 
 在 Notebook 内部直接安装 Python 包。这比使用 `!pip install` 更可靠，因为它能确保将包安装到当前内核正在使用的 Python 环境中。
+
 ```python
 # 使用 %pip 安装一个包 (例如，line_profiler)
 # %pip install line_profiler
@@ -437,6 +469,7 @@ plt.show()
 ### `%memit`
 
 测量代码执行所消耗的内存。需要先安装 `memory_profiler` 包 (`pip install memory_profiler`)。
+
 ```python
 # 首先需要安装 memory_profiler
 # %pip install memory_profiler
@@ -452,6 +485,7 @@ plt.show()
 ### `%store`
 
 在变量和 IPython 数据库之间传递变量。可以在不同的 Notebook 会话之间共享变量。
+
 ```python
 # 创建一个变量并存储它
 my_shared_variable = {"name": "Jupyter", "version": "1.0"}
@@ -479,6 +513,7 @@ print(my_shared_variable)
 ### `%capture`
 
 捕获单元格的输出（stdout, stderr）并将其存储在一个变量中。
+
 ```python
 # 捕获所有输出
 %%capture captured_output
@@ -498,4 +533,3 @@ print("--- Captured stderr ---")
 print(captured_output.stderr)
 
 ```
-

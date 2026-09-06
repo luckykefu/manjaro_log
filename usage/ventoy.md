@@ -62,10 +62,12 @@ sudo ventoy -l /dev/sda
 ### 5. 使用 U 盘
 
 安装完成后，U 盘会被分为两个分区：
+
 - **第1分区（exFAT）**：存放 ISO 文件的数据分区
 - **第2分区（FAT）**：Ventoy 启动分区（隐藏）
 
 **使用方式：**
+
 1. 将 ISO 文件直接复制到 U 盘第1分区
 2. 重启计算机
 3. BIOS 中设置 USB 启动
@@ -88,51 +90,55 @@ sudo ventoy -i -S /dev/sda
 在 U 盘第1分区创建 `ventoy/ventoy.json` 配置文件，可实现：
 
 #### 菜单主题
+
 ```json
 {
-    "theme": {
-        "file": "/ventoy/theme/theme.txt"
-    }
+  "theme": {
+    "file": "/ventoy/theme/theme.txt"
+  }
 }
 ```
 
 #### 启动菜单别名
+
 ```json
 {
-    "menu_alias": [
-        {
-            "image": "/Arch-Linux-x86_64.iso",
-            "alias": "Arch Linux"
-        },
-        {
-            "image": "/ubuntu-24.04-desktop.iso",
-            "alias": "Ubuntu 24.04"
-        }
-    ]
+  "menu_alias": [
+    {
+      "image": "/Arch-Linux-x86_64.iso",
+      "alias": "Arch Linux"
+    },
+    {
+      "image": "/ubuntu-24.04-desktop.iso",
+      "alias": "Ubuntu 24.04"
+    }
+  ]
 }
 ```
 
 #### 自动安装（无人值守）
+
 ```json
 {
-    "auto_install": [
-        {
-            "image": "/ubuntu-24.04-desktop.iso",
-            "template": "/ventoy/autoinstall/ubuntu-preseed.cfg"
-        }
-    ]
+  "auto_install": [
+    {
+      "image": "/ubuntu-24.04-desktop.iso",
+      "template": "/ventoy/autoinstall/ubuntu-preseed.cfg"
+    }
+  ]
 }
 ```
 
 #### 持久化分区
+
 ```json
 {
-    "persistence": [
-        {
-            "image": "/ubuntu-24.04-desktop.iso",
-            "backend": "/ventoy/persistence/ubuntu.dat"
-        }
-    ]
+  "persistence": [
+    {
+      "image": "/ubuntu-24.04-desktop.iso",
+      "backend": "/ventoy/persistence/ubuntu.dat"
+    }
+  ]
 }
 ```
 
@@ -149,13 +155,13 @@ mkfs.ext4 ubuntu.dat
 
 ## 支持的镜像类型
 
-| 类型 | 扩展名 |
-|------|--------|
-| ISO | `.iso` |
-| 微软镜像 | `.wim` |
-| 软盘/硬盘镜像 | `.img` |
-| 虚拟硬盘 | `.vhd` / `.vhdx` |
-| EFI 启动文件 | `.efi` |
+| 类型          | 扩展名           |
+| ------------- | ---------------- |
+| ISO           | `.iso`           |
+| 微软镜像      | `.wim`           |
+| 软盘/硬盘镜像 | `.img`           |
+| 虚拟硬盘      | `.vhd` / `.vhdx` |
+| EFI 启动文件  | `.efi`           |
 
 > 支持 1000+ 种操作系统，包括 Windows、Linux、ESXi、WinPE 等。
 
@@ -185,6 +191,7 @@ U 盘根目录/
 ### 多系统启动
 
 一个 U 盘可同时存放多个 ISO：
+
 - 多个 Linux 发行版
 - Windows 安装镜像
 - 救援/维护工具
@@ -202,15 +209,19 @@ U 盘根目录/
 ## 常见问题
 
 ### Q: 启动后黑屏或无法进入菜单？
+
 A: 尝试禁用 Secure Boot，或使用 MBR 分区重新安装。
 
 ### Q: 某个 ISO 无法启动？
+
 A: 检查 Ventoy 官网的兼容性列表，或更新 Ventoy 到最新版本。
 
 ### Q: 如何卸载 Ventoy？
+
 A: 直接格式化 U 盘即可，或使用 `sudo ventoy -I /dev/sda` 重新安装别的工具。
 
 ### Q: 如何添加更多类型的镜像？
+
 A: 直接复制到 U 盘即可，Ventoy 支持递归扫描目录。
 
 ---

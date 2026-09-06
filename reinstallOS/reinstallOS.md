@@ -8,7 +8,9 @@ Modes=1
 kscreen-doctor "output.${output}.mode.${Modes}"
 
 ```
+
 ## app cfg
+
 ```bash
 sudo tailscale up
 

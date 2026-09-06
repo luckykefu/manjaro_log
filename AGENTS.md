@@ -12,6 +12,7 @@
 user=lkf # 远程用户
 host=100.75.45.52 # 远程 tailscale IP
 ```
+
 - 读取文件|执行命令: `tailscale ssh "$user@$host" "cmd"`
 - 修改远程文件:
   - 拉取到本地: `tailscale ssh "$user@$host" "cat /path/to/src" > /path/to/dst`

@@ -2,7 +2,7 @@
 sudo pacman -S --noconfirm --needed waydroid
 ## >>> 更改 Waydroid 数据目录 >>>
 mkdir -p /data/.waydroid
-sudo rm -fr /var/lib/waydroid 
+sudo rm -fr /var/lib/waydroid
 sudo ln -sf /data/.waydroid /var/lib/waydroid
 
 export all_proxy="socks5h://127.0.0.1:7890"
@@ -12,8 +12,8 @@ sudo systemctl start waydroid-container.service
 # sudo pacman -S --needed --noconfirm bash-dbus
 yay -S waydroid-script-git --noconfirm --needed
 
-sudo -E python3 /opt/waydroid-script/main.py -a 13 install libhoudini 
-# sudo -E python3 /opt/waydroid-script/main.py -a 13 install libndk 
+sudo -E python3 /opt/waydroid-script/main.py -a 13 install libhoudini
+# sudo -E python3 /opt/waydroid-script/main.py -a 13 install libndk
 
 #### internet
 

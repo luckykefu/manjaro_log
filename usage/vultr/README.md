@@ -12,11 +12,11 @@ vultr_list_instances() {
 
 # 创建实例
 
-| 参数 | 默认值 | 说明 |
-|------|--------|------|
-| $1 region | nrt | 区域: nrt(东京), sgp(新加坡), ewr(新泽西) |
-| $2 plan | vc2-1c-1gb | 套餐: vc2-1c-1gb(1vCPU/1GB), vc2-1c-2gb 等 |
-| $3 os_id | 535 | 系统 ID: 535(Arch Linux), 164(Ubuntu 22.04) |
+| 参数      | 默认值     | 说明                                        |
+| --------- | ---------- | ------------------------------------------- |
+| $1 region | nrt        | 区域: nrt(东京), sgp(新加坡), ewr(新泽西)   |
+| $2 plan   | vc2-1c-1gb | 套餐: vc2-1c-1gb(1vCPU/1GB), vc2-1c-2gb 等  |
+| $3 os_id  | 535        | 系统 ID: 535(Arch Linux), 164(Ubuntu 22.04) |
 
 输出创建实例的默认密码。
 
@@ -41,10 +41,10 @@ vultr_create_instance() {
 
 # 推送ssh密钥到实例
 
-| 参数 | 必填 | 说明 |
-|------|------|------|
-| $1 instance_id | 是 | 实例 ID |
-| $2 password | 是 | 实例密码 |
+| 参数           | 必填 | 说明     |
+| -------------- | ---- | -------- |
+| $1 instance_id | 是   | 实例 ID  |
+| $2 password    | 是   | 实例密码 |
 
 依赖: `sshpass` (`pacman -S sshpass`)
 
@@ -67,9 +67,9 @@ vultr_push_sshkey() {
 
 # 销毁实例
 
-| 参数 | 必填 | 说明 |
-|------|------|------|
-| $1 instance_id | 是 | 实例 ID |
+| 参数           | 必填 | 说明    |
+| -------------- | ---- | ------- |
+| $1 instance_id | 是   | 实例 ID |
 
 ```bash
 vultr_delete_instance() {
