@@ -23,4 +23,3 @@
 
 审查完成后列出问题和解决方案.
 审查位置(包含本地外部依赖):
-/data/nutilustrader/creats/strategies

@@ -4,13 +4,6 @@ set -euo pipefail
 
 TS_AUTHKEY="tskey-auth-kLLnbWoPCV11CNTRL-GJ2u4M73hq4Cacyu84NUq4S6fHe7EQZv"
 
-install() {
-    command -v tailscale &>/dev/null || {
-        echo "tailscale: installing..."
-        curl -fsSL https://tailscale.com/install.sh | sh
-    }
-}
-
 check_env() {
     local pid1
     pid1=$(ps --pid 1 -o comm= 2>/dev/null || echo "unknown")
