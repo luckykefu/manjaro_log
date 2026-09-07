@@ -85,4 +85,5 @@ ssh -o StrictHostKeyChecking=accept-new root@"$colab_ip"
 
 ```bash
 colab stop -s "$mysession"
+colab status
 ```

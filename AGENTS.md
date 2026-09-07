@@ -42,7 +42,7 @@ host=100.75.45.52 # 远程 tailscale IP
 
 需求分析 -> 解决方案 -> 方案部署
 -> `cargo check -p <包名>`
--> `cargo clipper -p <包名>`
+-> `cargo clippy -p <包名>`
 -> `cargo test -p <包名>`
 -> `cargo run -p <包名> --release -- -c /path/config.toml`
 -> `cargo fmt`
