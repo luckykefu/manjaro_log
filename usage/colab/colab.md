@@ -62,6 +62,7 @@ echo "done, ip: $(tailscale ip -4)"
 ## 上传 AGENTS.md
 
 ```bash
+# scp /data/.manjaro/AGENTS.md  root@100.98.198.90:/root/
 colab upload /data/.manjaro/AGENTS.md /root/AGENTS.md
 colab ls -s "$mysession" /root | grep AGENTS.md
 colab status

@@ -8,6 +8,7 @@ vultr_list_instances() {
         -H "Authorization: Bearer $VULTR_API_KEY" \
         | jq -r '.instances[] | "[\(.id)] \(.label // .hostname) | \(.os) | \(.main_ip) | \(.status) | \(.ram/1024)GB | \(.vcpu_count)vCPU"'
 }
+vultr_list_instances
 ```
 
 # 创建实例
