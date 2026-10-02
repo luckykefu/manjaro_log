@@ -49,36 +49,35 @@ TS_AUTHKEY="tskey-auth-kntP2EjRL411CNTRL-GkpejtYkZuK27sersA9wuKB8VrfZeukjD"
 sudo tailscale --socket=/run/tailscale/tailscaled.sock up \
     --accept-routes --accept-dns=false \
     --ssh --authkey="${TS_AUTHKEY}"
-echo "done, ip: $(tailscale ip -4)"
+echo "done, ip:"
+echo "$(tailscale ip -4)"
 ```
 
-## 安装 opencode
+### colab 保活
 
 ```bash
-[ -x ~/.opencode/bin/opencode ] || curl -fsSL https://opencode.ai/install | bash &> /dev/null
-~/.opencode/bin/opencode -v
-```
-
-## 上传 AGENTS.md
-
-```bash
-# scp /data/.manjaro/AGENTS.md  root@100.98.198.90:/root/
-colab upload /data/.manjaro/AGENTS.md /root/AGENTS.md
-colab ls -s "$mysession" /root | grep AGENTS.md
-colab status
+import time
+for i in range(1000):
+  print(f"alive {i}", flush=True)
+  time.sleep(300)  # 5min一次，别太密，输出太多会卡死浏览器
 ```
 
 ## 连接
 
 ```bash
-colab_ip=$(colab exec -s "$mysession" <<< $'%%bash\ntailscale ip -4' 2>/dev/null \
-  | grep -Eo '([0-9]{1,3}\.){3}[0-9]{1,3}')
-ssh -o StrictHostKeyChecking=accept-new root@"$colab_ip"
+ssh -o StrictHostKeyChecking=accept-new root@100.104.49.32
 ```
 
-## 启动 opencode
+## 上传 AGENTS.md
 
 ```bash
+scp /data/.manjaro/AGENTS.md  root@100.104.49.32:/root/
+```
+
+## 安装 opencode
+
+```bash
+[ -x ~/.opencode/bin/opencode ] || curl -fsSL https://opencode.ai/v2/install | bash &> /dev/null
 ~/.opencode/bin/opencode
 ```
 

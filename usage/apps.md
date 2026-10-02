@@ -70,3 +70,9 @@ for mod in vboxdrv vboxnetadp vboxnetflt; do
 done
 sudo usermod -aG vboxusers "$USER" && echo "  ✓ Added $USER to vboxusers group"
 ```
+
+## vscode
+
+```bash
+yay -S --noconfirm --needed visual-studio-code-bin 
+```
