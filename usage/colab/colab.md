@@ -36,22 +36,7 @@ colab new -s "$mysession"
 colab console -s "$mysession"
 ```
 
-## 配置tailscale
-
-### 安装&启动&认证
-
-```bash
-command -v tailscale || curl -fsSL https://tailscale.com/install.sh | sh &> /dev/null
-tailscale -V
-sudo killall tailscaled || true
-nohup sudo tailscaled --tun=userspace-networking --state=/var/lib/tailscale/tailscaled.state &
-TS_AUTHKEY="tskey-auth-kntP2EjRL411CNTRL-GkpejtYkZuK27sersA9wuKB8VrfZeukjD"
-sudo tailscale --socket=/run/tailscale/tailscaled.sock up \
-    --accept-routes --accept-dns=false \
-    --ssh --authkey="${TS_AUTHKEY}"
-echo "done, ip:"
-echo "$(tailscale ip -4)"
-```
+## [配置tailscale](./配置tailscale.sh)
 
 ### colab 保活
 
@@ -59,26 +44,13 @@ echo "$(tailscale ip -4)"
 import time
 for i in range(1000):
   print(f"alive {i}", flush=True)
-  time.sleep(300)  # 5min一次，别太密，输出太多会卡死浏览器
+  time.sleep(600)  # 5min一次，别太密，输出太多会卡死浏览器
 ```
 
-## 连接
+## 连接 colab
 
 ```bash
 ssh -o StrictHostKeyChecking=accept-new root@100.104.49.32
-```
-
-## 上传 AGENTS.md
-
-```bash
-scp /data/.manjaro/AGENTS.md  root@100.104.49.32:/root/
-```
-
-## 安装 opencode
-
-```bash
-[ -x ~/.opencode/bin/opencode ] || curl -fsSL https://opencode.ai/v2/install | bash &> /dev/null
-~/.opencode/bin/opencode
 ```
 
 ## 停止
