@@ -34,12 +34,24 @@ sudo tailscale up --accept-routes --accept-dns=false --ssh --authkey="${TS_AUTHK
 
 ```bash
 # 4. 安全删除离线设备（本机确认 + API 匹配）：
-
-TS_AUTHKEY="tskey-api-k2E6p4F5Tq11CNTRL-dYbwk2MzTG61GdEBgy7dF66ZovBqRbb9U"
 TAILNET="kefu1820@gmail.com"
-curl -s -u "$TS_AUTHKEY:" "https://api.tailscale.com/api/v2/tailnet/-/devices" | \
+# ===== 配置 =====
+# 用 API token（tskey-api-...），在 Admin Console → Settings → Keys 生成
+API_KEY="tskey-api-k2E6p4F5Tq11CNTRL-dYbwk2MzTG61GdEBgy7dF66ZovBqRbb9U"
+export API_KEY
+
+# ===== 第一步：先查看将被删除的设备（只读，确认无误后再往下）=====
+curl -s -u "$API_KEY:" "https://api.tailscale.com/api/v2/tailnet/-/devices" | \
+  jq -r '.devices[] | select(.connectedToControl == false) | "\(.id)  \(.name)  lastSeen=\(.lastSeen)"'
+
+# ===== 第二步：删除所有 connectedToControl == false 的离线设备 =====
+curl -s -u "$API_KEY:" "https://api.tailscale.com/api/v2/tailnet/-/devices" | \
   jq -r '.devices[] | select(.connectedToControl == false) | .id' | \
-  xargs -I{} sh -c 'echo "删除 {}"; curl -s -X DELETE -u "$TS_AUTHKEY:" -o /dev/null "https://api.tailscale.com/api/v2/device/{}"'
+  xargs -I{} sh -c 'echo "删除 {}"; curl -s -X DELETE -u "$API_KEY:" -o /dev/null -w " -> HTTP %{http_code}\n" "https://api.tailscale.com/api/v2/device/{}"'
+
+# ===== 第三步：验证删除结果 =====
+curl -s -u "$API_KEY:" "https://api.tailscale.com/api/v2/tailnet/-/devices" | \
+  jq -r '.devices[] | "\(.name)  connected=\(.connectedToControl)"'
 
 offline=$(tailscale status --json | jq -r '[.Peer[] | select(.Online == false) | .DNSName | rtrimstr(".")] | .[]') && echo $offline
 ```

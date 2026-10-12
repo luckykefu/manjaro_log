@@ -42,9 +42,9 @@ colab console -s "$mysession"
 
 ```bash
 import time
-for i in range(1000):
-  print(f"alive {i}", flush=True)
-  time.sleep(600)  # 5min一次，别太密，输出太多会卡死浏览器
+while True:
+    print("alive", flush=True)
+    time.sleep(600)
 ```
 
 ## 连接 colab
