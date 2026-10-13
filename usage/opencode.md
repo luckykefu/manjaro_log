@@ -3,8 +3,13 @@
 ## 安装
 
 ```bash
-[ -x ~/.opencode/bin/opencode ] || curl -fsSL https://opencode.ai/install | bash &> /dev/null
-~/.opencode/bin/opencode -v
+install_and_run_opencode() {
+    # [ -x ... ] 判断文件存在且可执行；|| 表示不存在才执行安装
+    [ -x ~/.opencode/bin/opencode ] || curl -fsSL https://opencode.ai/v2/install | bash
+    # ~ 是当前用户家目录（/root 或 /home/xxx）
+    ~/.opencode/bin/opencode
+}
+
 ```
 
 ## Rust skill 安装

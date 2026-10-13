@@ -34,7 +34,7 @@ tailscale_up() {
     sudo tailscale --socket=/run/tailscale/tailscaled.sock up \
         --accept-routes --accept-dns=false \
         --ssh --authkey="${TS_AUTHKEY}"
-    echo "done, ip: $(tailscale ip -4)"
+    echo "tailscale started, ip: $(tailscale ip -4)"
 }
 
 # ========== 4. 配置 ssh ==========
