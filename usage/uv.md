@@ -4,7 +4,7 @@
 
 ```bash
 # Manjaro / Arch Linux
-sudo pacman -S uv
+sudo pacman -S --needed --noconfirm uv
 
 # pip（需要 Python 3.13+）
 pip install uv
